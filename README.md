@@ -44,6 +44,28 @@ PI_URL=http://127.0.0.1:3000 npm run web
 
 On the Pi, run the service bound to the USB link address: `BIND=192.168.7.1:3000 ./pi-service`.
 
+## Chat bridge
+
+The web app's chatbox talks to the Pi through the Vite proxy (`/v1/*` -> `PI_URL`).
+
+| Endpoint | Request | Response |
+|---|---|---|
+| `GET /v1/health` | | `{status, service, version, llama_configured}` |
+| `POST /v1/chat` | `{"message": "..."}` (1 to 200 chars) | `{"reply": "...", "source": "llama" \| "mock"}` |
+
+Errors are `{"error": "..."}`: `400` for an empty or too-long message, `502` if llama-server
+did not answer.
+
+`pi-service` forwards the message to llama-server's OpenAI-style `/v1/chat/completions` when
+`LLAMA_URL` is set, and returns a mock reply otherwise, so the whole chain can be tried with no Pi
+and no model:
+
+```bash
+cargo run -p pi-service                                  # mock replies
+LLAMA_URL=http://127.0.0.1:8081 cargo run -p pi-service  # real model
+npm run web                                              # chatbox at http://localhost:5173
+```
+
 ## Privacy
 
 Visitor questions are logged **on the laptop only**, to `logs/interactions.jsonl`
