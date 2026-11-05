@@ -1,10 +1,13 @@
 {
   "name": "pet",
   "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
-    "web": "npm --filter web dev"
-  },
-  "npm": {
-    "onlyBuiltDependencies": ["esbuild"]
+    "web": "npm run dev --workspace web",
+    "build": "npm run build --workspace web",
+    "typecheck": "npm run typecheck --workspace web",
+    "test": "npm run test --workspace web"
   }
 }

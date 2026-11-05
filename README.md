@@ -31,9 +31,12 @@ laptop (game + UI, source of truth)  <--- USB Ethernet (RNDIS/ECM) --->  Pi Zero
 cargo test --workspace
 cargo run -p pi-service                      # listens on 127.0.0.1:3000
 
-# Web: dev server, proxying /v1 to the Pi (or to a local pi-service)
-cd apps/web && npm dev                      # PI_URL defaults to http://192.168.7.1:3000
-cd apps/web && PI_URL=http://127.0.0.1:3000 npm dev
+# Web (npm workspaces): install once from the repo root
+npm install
+
+# Dev server, proxying /v1 to the Pi (or to a local pi-service)
+npm run web                                 # PI_URL defaults to http://192.168.7.1:3000
+PI_URL=http://127.0.0.1:3000 npm run web
 
 # Cross-compile the service for the Pi (Debian trixie, aarch64)
 ./scripts/build-pi.sh
