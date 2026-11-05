@@ -1,0 +1,2 @@
+TODO: static English prompt prefix (persona, rules, 2 short examples).
+Keep it byte-identical between requests so llama.cpp can reuse the KV cache.

@@ -1,0 +1,10 @@
+{
+  "name": "pet",
+  "private": true,
+  "scripts": {
+    "web": "npm --filter web dev"
+  },
+  "npm": {
+    "onlyBuiltDependencies": ["esbuild"]
+  }
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "club.intro",
+    "about": "club",
+    "public": false,
+    "keywords": {
+      "id": ["klub", "ekskul", "komunitas"],
+      "en": ["club", "team", "community"]
+    },
+    "text": {
+      "id": "TODO: satu kalimat tentang klub, 25 kata atau kurang.",
+      "en": "TODO: one sentence about the club, 25 words or fewer."
+    },
+    "fallback_line": {
+      "id": "TODO: versi suara si hewan peliharaan.",
+      "en": "TODO: the pet's-voice version."
+    },
+    "must_contain": []
+  },
+  {
+    "id": "me.intro",
+    "about": "me",
+    "public": false,
+    "keywords": {
+      "id": ["pembuat", "pencipta", "kreator"],
+      "en": ["maker", "creator", "builder"]
+    },
+    "text": {
+      "id": "TODO: satu kalimat tentang pembuatnya.",
+      "en": "TODO: one sentence about the maker."
+    },
+    "fallback_line": {
+      "id": "TODO: versi suara si hewan peliharaan.",
+      "en": "TODO: the pet's-voice version."
+    },
+    "must_contain": []
+  }
+]

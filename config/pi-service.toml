@@ -1,0 +1,16 @@
+# Planned settings for pi-service. NOT read by the code yet; env vars BIND is the only one in use.
+bind = "192.168.7.1:3000"
+
+[llama]
+binary = "/home/edgelm/llama/llama-server"
+model = "/home/edgelm/models/gemma-3-270m-it-Q4_K_M.gguf"
+host = "127.0.0.1"
+port = 8081
+ctx = 512
+threads = 4
+
+[limits]
+max_input_chars = 200
+n_predict = 32
+request_timeout_secs = 12
+queue_depth = 4

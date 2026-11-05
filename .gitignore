@@ -1,0 +1,12 @@
+# build output
+/target/
+node_modules/
+/dist/
+apps/web/dist/
+
+# local-only data
+/logs/
+/models/
+*.gguf
+.env
+.DS_Store
