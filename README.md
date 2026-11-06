@@ -58,6 +58,26 @@ Pi-side output goes to `logs/pi.log` on the Mac, and llama-server's own log is `
 on the Pi. The Pi needs the `pi-service` binary at `~/pi-service` (see `scripts/build-pi.sh`);
 model and paths can be changed with env vars at the top of `scripts/pi-run.sh`.
 
+### On Windows
+
+Same thing, with `scripts\run.cmd` (a wrapper for `scripts\run.ps1`). It needs Node.js and the
+OpenSSH client (built into Windows 10/11; Settings > Optional features if missing).
+
+```powershell
+scripts\run.cmd
+$env:PI_HOST = "edgelm@192.168.22.73"; scripts\run.cmd    # if edgelm.local does not resolve
+```
+
+Set up an SSH key once so ssh does not need to ask for a password mid-run:
+
+```powershell
+ssh-keygen -t ed25519                                  # press Enter through the prompts
+type $env:USERPROFILE\.ssh\id_ed25519.pub | ssh edgelm@edgelm.local "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
+```
+
+On Windows the Pi-side log is on the Pi at `~/pet-run.log` (the script prints its last lines if the
+Pi side fails to start).
+
 ## Chat bridge
 
 The web app's chatbox talks to the Pi through the Vite proxy (`/v1/*` -> `PI_URL`).
