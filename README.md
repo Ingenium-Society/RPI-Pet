@@ -44,6 +44,20 @@ PI_URL=http://127.0.0.1:3000 npm run web
 
 On the Pi, run the service bound to the USB link address: `BIND=192.168.7.1:3000 ./pi-service`.
 
+## Run it on the Pi from the Mac (one command)
+
+```bash
+./scripts/run.sh                                  # PI_HOST defaults to edgelm@edgelm.local
+PI_HOST=edgelm@192.168.22.73 ./scripts/run.sh     # if edgelm.local does not resolve
+```
+
+It copies `scripts/pi-run.sh` to the Pi, starts llama-server and `pi-service` there, forwards
+port 3000 through SSH, waits until `/v1/health` reports `llama_configured: true`, then starts the
+chatbox at http://localhost:5173. Ctrl-C stops everything, including the processes on the Pi.
+Pi-side output goes to `logs/pi.log` on the Mac, and llama-server's own log is `~/pet-llama.log`
+on the Pi. The Pi needs the `pi-service` binary at `~/pi-service` (see `scripts/build-pi.sh`);
+model and paths can be changed with env vars at the top of `scripts/pi-run.sh`.
+
 ## Chat bridge
 
 The web app's chatbox talks to the Pi through the Vite proxy (`/v1/*` -> `PI_URL`).
