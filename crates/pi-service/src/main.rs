@@ -13,6 +13,8 @@ use serde_json::{json, Value};
 const MAX_INPUT_CHARS: usize = 200;
 const N_PREDICT: u32 = 32;
 const REQUEST_TIMEOUT: Duration = Duration::from_secs(12);
+/// Cap on the optional mood text from the game, to protect the small context window.
+const MAX_STYLE_HINT_CHARS: usize = 200;
 
 // TODO: move to data/prompts/prefix.{id,en}.txt once those are written.
 const SYSTEM_PROMPT: &str = "You are a small, friendly virtual pet. \
@@ -28,6 +30,9 @@ struct AppState {
 #[derive(Deserialize)]
 struct ChatRequest {
     message: String,
+    /// Optional extra system-prompt text from the game (mood: tired, cheerful, ...).
+    #[serde(default)]
+    style_hint: String,
 }
 
 #[derive(Serialize)]
@@ -75,7 +80,8 @@ async fn chat(
         }));
     };
 
-    let reply = ask_llama(&st.client, base, message).await.map_err(|e| {
+    let system = build_system_prompt(&req.style_hint);
+    let reply = ask_llama(&st.client, base, &system, message).await.map_err(|e| {
         tracing::warn!("llama-server request failed: {e}");
         api_error(StatusCode::BAD_GATEWAY, "the pet's brain did not answer")
     })?;
@@ -85,14 +91,29 @@ async fn chat(
     }))
 }
 
+/// Base prompt plus the game's mood hint (trimmed and length-capped), if any.
+fn build_system_prompt(style_hint: &str) -> String {
+    let hint: String = style_hint.trim().chars().take(MAX_STYLE_HINT_CHARS).collect();
+    if hint.is_empty() {
+        SYSTEM_PROMPT.to_string()
+    } else {
+        format!("{SYSTEM_PROMPT} {hint}")
+    }
+}
+
 fn mock_reply(message: &str) -> String {
     format!("(mock pet) I heard you say: {message}")
 }
 
-async fn ask_llama(client: &reqwest::Client, base: &str, message: &str) -> Result<String, String> {
+async fn ask_llama(
+    client: &reqwest::Client,
+    base: &str,
+    system: &str,
+    message: &str,
+) -> Result<String, String> {
     let body = json!({
         "messages": [
-            { "role": "system", "content": SYSTEM_PROMPT },
+            { "role": "system", "content": system },
             { "role": "user", "content": message },
         ],
         "max_tokens": N_PREDICT,
@@ -217,6 +238,30 @@ mod tests {
     async fn chat_rejects_malformed_json() {
         let (status, _) = post_chat(r#"{"nope":1}"#).await;
         assert!(status.is_client_error());
+    }
+
+    #[tokio::test]
+    async fn chat_accepts_style_hint() {
+        let (status, _) = post_chat(r#"{"message":"hi","style_hint":"You are sleepy."}"#).await;
+        assert_eq!(status, StatusCode::OK);
+    }
+
+    #[test]
+    fn empty_hint_leaves_prompt_unchanged() {
+        assert_eq!(build_system_prompt(""), SYSTEM_PROMPT);
+        assert_eq!(build_system_prompt("   "), SYSTEM_PROMPT);
+    }
+
+    #[test]
+    fn hint_is_appended_to_prompt() {
+        let p = build_system_prompt(" You are sleepy. ");
+        assert_eq!(p, format!("{SYSTEM_PROMPT} You are sleepy."));
+    }
+
+    #[test]
+    fn overlong_hint_is_truncated() {
+        let p = build_system_prompt(&"x".repeat(MAX_STYLE_HINT_CHARS + 50));
+        assert_eq!(p.chars().count(), SYSTEM_PROMPT.chars().count() + 1 + MAX_STYLE_HINT_CHARS);
     }
 
     #[test]
