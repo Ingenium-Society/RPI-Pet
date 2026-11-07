@@ -5,12 +5,18 @@ export type Health = {
   status: string
   version: string
   llama_configured?: boolean
-  // Optional telemetry for the benchmark panel. pi-service does not send these yet
-  // (see the TODO in its health()); each row appears only when the field is present.
+  // Optional telemetry for the benchmark panel, sent by pi-service's /v1/health. Each field is
+  // left out when it cannot be measured (e.g. no thermal sensor on a laptop), and each row
+  // appears only when its field is present.
+  /** Is llama-server answering? Only sent when pi-service has one configured. */
+  llama_up?: boolean
   model?: string
+  /** Speed of the most recent llama reply. */
   tok_per_sec?: number
   cpu_temp_c?: number
   ram_free_mb?: number
+  /** True while the Pi is under-volted, frequency-capped or thermally throttled. */
+  throttled?: boolean
 }
 
 export type ChatReply = { reply: string; source: 'llama' | 'mock' }

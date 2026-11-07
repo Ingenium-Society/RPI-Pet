@@ -38,6 +38,7 @@ export default function BenchPanel() {
         </small>
       </h2>
       <dl>
+        {health?.llama_up != null && <Row label="Otak AI" value={health.llama_up ? 'aktif' : 'mati'} />}
         {health?.model && <Row label="Model" value={health.model} />}
         <Row label="Sumber jawaban" value={last?.source ?? '-'} />
         <Row label="Waktu jawab" value={last ? fmtMs(last.ms) : '-'} />
@@ -45,6 +46,7 @@ export default function BenchPanel() {
         {health?.tok_per_sec != null && <Row label="Kecepatan" value={`${health.tok_per_sec.toFixed(1)} token/detik`} />}
         {health?.cpu_temp_c != null && <Row label="Suhu CPU" value={`${health.cpu_temp_c.toFixed(0)} °C`} />}
         {health?.ram_free_mb != null && <Row label="RAM bebas" value={`${health.ram_free_mb.toFixed(0)} MB`} />}
+        {health?.throttled != null && <Row label="Throttling" value={health.throttled ? 'YA' : 'tidak'} />}
       </dl>
       <div className="mt-2.5 border-t border-slate-200 pt-2.5">
         <Bar label={S.energy} value={stats.energy} />
