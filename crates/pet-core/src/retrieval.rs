@@ -1,8 +1,24 @@
 use crate::facts::{Fact, Lang};
 
 const STOP_ID: &[&str] = &[
-    "apa", "siapa", "yang", "kamu", "dia", "itu", "ini", "di", "dan", "dari", "ke", "adalah",
-    "tentang", "ceritakan", "tolong", "dong", "sih", "ya",
+    "apa",
+    "siapa",
+    "yang",
+    "kamu",
+    "dia",
+    "itu",
+    "ini",
+    "di",
+    "dan",
+    "dari",
+    "ke",
+    "adalah",
+    "tentang",
+    "ceritakan",
+    "tolong",
+    "dong",
+    "sih",
+    "ya",
 ];
 const STOP_EN: &[&str] = &[
     "what", "who", "is", "are", "the", "a", "an", "of", "about", "tell", "me", "you", "your", "do",

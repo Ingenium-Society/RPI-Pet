@@ -4,4 +4,4 @@
 pub mod facts;
 pub mod retrieval;
 
-pub use facts::{load_facts, parse_facts, Fact, Lang, L10n};
+pub use facts::{load_facts, parse_facts, Fact, L10n, Lang};
