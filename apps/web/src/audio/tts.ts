@@ -1,23 +1,53 @@
 import { voice } from './voice'
 
-// Hook for edge-tts. It expects the laptop to serve GET /__tts?text=... returning audio
-// (for example a small Vite dev-server middleware like /__log). That endpoint does not
-// exist yet: until it does, the first call finds out, TTS switches itself off, and the pet
-// just moves its mouth for a moment instead.
-let available = true
+type Lang = 'id' | 'en'
 
-/** Speaks `text`. Returns false when there is no TTS endpoint or playback failed. */
-export async function speak(text: string): Promise<boolean> {
-  if (!available) return false
-  try {
-    const res = await fetch(`/__tts?text=${encodeURIComponent(text)}`)
-    if (!res.ok || !res.headers.get('content-type')?.startsWith('audio/')) {
-      available = false
-      return false
+// Preferred voice: GET /__tts on the laptop's Vite server (see tts-endpoint.ts), which uses
+// Microsoft Edge's neural voices and needs internet the first time a line is spoken.
+// Fallback: the browser's own built-in voice, which works offline but sounds more robotic.
+//
+// A failed request (no internet, service hiccup) only affects that one reply. The endpoint is
+// written off only when it plainly does not exist, e.g. a static build without the dev server.
+let endpointMissing = false
+
+/** Speaks `text` in the given language. Returns false when nothing could be played. */
+export async function speak(text: string, lang: Lang = 'id'): Promise<boolean> {
+  if (!endpointMissing) {
+    try {
+      const res = await fetch(`/__tts?${new URLSearchParams({ text, lang })}`)
+      const type = res.headers.get('content-type') ?? ''
+      if (res.ok && type.startsWith('audio/')) {
+        await voice.play(await res.arrayBuffer())
+        return true
+      }
+      // 404, or the SPA fallback page (200 text/html): there is no such endpoint.
+      if (res.status === 404 || type.includes('text/html')) endpointMissing = true
+    } catch {
+      /* network error or undecodable audio: use the browser voice for this reply */
     }
-    await voice.play(await res.arrayBuffer())
-    return true
-  } catch {
-    return false
   }
+  return speakWithBrowser(text, lang)
+}
+
+const LOCALE: Record<Lang, string> = { id: 'id-ID', en: 'en-US' }
+
+function speakWithBrowser(text: string, lang: Lang): Promise<boolean> {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return Promise.resolve(false)
+  const synth = window.speechSynthesis
+  synth.cancel() // never talk over a previous reply
+
+  const utterance = new SpeechSynthesisUtterance(text)
+  utterance.lang = LOCALE[lang]
+  // Prefer an installed voice for the language (the list can be empty until the browser loads it).
+  const prefix = lang
+  utterance.voice =
+    synth.getVoices().find((v) => v.lang.toLowerCase().startsWith(prefix)) ?? null
+  utterance.pitch = 1.3 // a little higher: it is a small pet
+  utterance.rate = 1.05
+
+  return new Promise((resolve) => {
+    utterance.onend = () => resolve(true)
+    utterance.onerror = () => resolve(false)
+    synth.speak(utterance)
+  })
 }

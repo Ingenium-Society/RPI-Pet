@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { createTtsHandler, edgeSynth, voicesFromEnv } from './tts-endpoint'
 
 // Pi on the USB link by default. For local development without a Pi:
 //   PI_URL=http://127.0.0.1:3000 npm dev   (and: cargo run -p pi-service)
@@ -42,8 +43,28 @@ function interactionLogger(): Plugin {
   }
 }
 
+// The pet's voice: GET /__tts?text=...&lang=id|en returns audio (see tts-endpoint.ts).
+// Clips are cached under <repo>/logs/tts-cache. Voices: TTS_VOICE_ID / TTS_VOICE_EN.
+function ttsEndpoint(): Plugin {
+  const voices = voicesFromEnv()
+  const handler = createTtsHandler({
+    synth: edgeSynth(voices),
+    cacheDir: fileURLToPath(new URL('../../logs/tts-cache', import.meta.url)),
+    tag: `${voices.id.voice}|${voices.en.voice}`,
+  })
+  return {
+    name: 'tts-endpoint',
+    configureServer(server) {
+      server.middlewares.use('/__tts', handler)
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use('/__tts', handler)
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [react(), tailwindcss(), interactionLogger()],
+  plugins: [react(), tailwindcss(), interactionLogger(), ttsEndpoint()],
   server: {
     proxy: { '/v1': { target: PI_URL, changeOrigin: true } },
   },

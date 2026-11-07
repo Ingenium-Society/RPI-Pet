@@ -119,6 +119,25 @@ DATA_DIR=data cargo run -p pi-service                    # load facts/prompts fr
 npm run web                                              # chatbox at http://localhost:5173
 ```
 
+## Voice (text-to-speech)
+
+The pet speaks each reply. The Vite dev server on the laptop provides `GET /__tts?text=...&lang=id|en`
+(`apps/web/tts-endpoint.ts`), which returns audio from Microsoft Edge's neural voices through the
+`node-edge-tts` package.
+
+- **Needs internet on the laptop**, but only the first time a line is spoken: every clip is cached
+  in `logs/tts-cache`, and the pet's canned lines repeat a lot, so they then work offline and play
+  instantly. To pre-load them at the venue, ask each question once while online.
+- **It is not an official public API** (no API key, but Microsoft can change or limit it). If the
+  project outgrows a school demo, Azure AI Speech offers the same voices officially.
+- **If it fails** (no internet, service down) the page uses the browser's built-in voice for that
+  reply, which works offline but sounds more robotic. Browsers need one click or tap on the page
+  before they will play any sound.
+- **Voices:** Indonesian `id-ID-GadisNeural`, English `en-US-AriaNeural`. Change them with
+  `TTS_VOICE_ID` / `TTS_VOICE_EN`, e.g. `TTS_VOICE_ID=id-ID-ArdiNeural npm run web`.
+- Like the interaction log, this endpoint exists in the dev server and `vite preview`, not in a
+  static build.
+
 ## Privacy
 
 Visitor questions are logged **on the laptop only**, to `logs/interactions.jsonl`

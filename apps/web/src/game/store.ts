@@ -61,7 +61,7 @@ export const useGame = create<GameState>()((set, get) => {
 
       const started = performance.now()
       try {
-        const { reply, source, fact_id: factId } = await askPet(message, styleHint)
+        const { reply, source, fact_id: factId, lang } = await askPet(message, styleHint)
         const ms = Math.round(performance.now() - started)
         set({
           busy: false,
@@ -70,7 +70,7 @@ export const useGame = create<GameState>()((set, get) => {
           speakingUntil: performance.now() + reply.length * 70,
         })
         logInteraction({ message, reply, source, fact_id: factId, ms, style_hint: styleHint, ...rounded() })
-        void speak(reply)
+        void speak(reply, lang)
       } catch (err) {
         const ms = Math.round(performance.now() - started)
         const error =
