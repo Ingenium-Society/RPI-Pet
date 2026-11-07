@@ -27,7 +27,7 @@ impl<T> L10n<T> {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Fact {
     pub id: String,
-    /// "me" | "partner" | "club"
+    /// "me" | "partner" | "club" | "pet"
     pub about: String,
     /// Only public facts can ever be retrieved.
     #[serde(default)]

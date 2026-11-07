@@ -1,0 +1,367 @@
+{
+  "_note": "expect = fact id retrieval should return, or null if the pet must deflect (out of scope, pet-state chat, or public:false fact). SYNTHETIC: add real visitor questions from logs/interactions.jsonl before trusting the tuned MIN_SCORE.",
+  "questions": [
+    {
+      "q": "Ingenium itu apa sih?",
+      "lang": "id",
+      "expect": "club.intro"
+    },
+    {
+      "q": "Klub ini tentang apa?",
+      "lang": "id",
+      "expect": "club.intro"
+    },
+    {
+      "q": "Apa alasan klub ini dibuat?",
+      "lang": "id",
+      "expect": "club.why"
+    },
+    {
+      "q": "Apa tujuan klub teknik ini?",
+      "lang": "id",
+      "expect": "club.why"
+    },
+    {
+      "q": "Anggotanya ada berapa orang?",
+      "lang": "id",
+      "expect": "club.members"
+    },
+    {
+      "q": "Ada divisi apa saja di klub?",
+      "lang": "id",
+      "expect": "club.divisions"
+    },
+    {
+      "q": "Siapa ketua klubnya?",
+      "lang": "id",
+      "expect": "club.leader"
+    },
+    {
+      "q": "Pembinanya siapa?",
+      "lang": "id",
+      "expect": "club.advisor"
+    },
+    {
+      "q": "Kapan jadwal pertemuan klub?",
+      "lang": "id",
+      "expect": "club.meetings"
+    },
+    {
+      "q": "Divisi software ngapain aja?",
+      "lang": "id",
+      "expect": "club.software"
+    },
+    {
+      "q": "Proyek absen pakai RFID itu gimana?",
+      "lang": "id",
+      "expect": "club.attendance"
+    },
+    {
+      "q": "House website itu buat apa?",
+      "lang": "id",
+      "expect": "club.house"
+    },
+    {
+      "q": "Proyeknya diuji dan diiterasi gimana?",
+      "lang": "id",
+      "expect": "club.process"
+    },
+    {
+      "q": "Kapan World Engineering Day?",
+      "lang": "id",
+      "expect": "club.wed"
+    },
+    {
+      "q": "Ada pameran apa dari klub ini?",
+      "lang": "id",
+      "expect": "club.showcase"
+    },
+    {
+      "q": "Forge Outreach itu apa?",
+      "lang": "id",
+      "expect": "club.outreach"
+    },
+    {
+      "q": "Apa itu Lab Fundamentals?",
+      "lang": "id",
+      "expect": "club.lab"
+    },
+    {
+      "q": "Di Workbench ngapain?",
+      "lang": "id",
+      "expect": "club.workbench"
+    },
+    {
+      "q": "Sekolahmu di mana?",
+      "lang": "id",
+      "expect": "club.school"
+    },
+    {
+      "q": "Kamu siapa?",
+      "lang": "id",
+      "expect": "pet.intro"
+    },
+    {
+      "q": "Kamu ini AI ya?",
+      "lang": "id",
+      "expect": "pet.intro"
+    },
+    {
+      "q": "Kamu itu robot?",
+      "lang": "id",
+      "expect": "pet.intro"
+    },
+    {
+      "q": "Siapa yang membuat kamu?",
+      "lang": "id",
+      "expect": "pet.makers"
+    },
+    {
+      "q": "Siapa itu Haidar?",
+      "lang": "id",
+      "expect": "me.intro"
+    },
+    {
+      "q": "Rizky itu siapa?",
+      "lang": "id",
+      "expect": "partner.intro"
+    },
+    {
+      "q": "Gimana cara gabung klub?",
+      "lang": "id",
+      "expect": null,
+      "note": "TODO_club_join is public:false"
+    },
+    {
+      "q": "Siapa nama kamu?",
+      "lang": "id",
+      "expect": null,
+      "note": "TODO_pet_name is public:false"
+    },
+    {
+      "q": "Presiden Indonesia siapa?",
+      "lang": "id",
+      "expect": null
+    },
+    {
+      "q": "Kamu lapar nggak?",
+      "lang": "id",
+      "expect": null,
+      "note": "pet state, not a fact"
+    },
+    {
+      "q": "Ceritain lelucon dong",
+      "lang": "id",
+      "expect": null
+    },
+    {
+      "q": "What is Ingenium?",
+      "lang": "en",
+      "expect": "club.intro"
+    },
+    {
+      "q": "Tell me about this club",
+      "lang": "en",
+      "expect": "club.intro"
+    },
+    {
+      "q": "What is the purpose of the club?",
+      "lang": "en",
+      "expect": "club.why"
+    },
+    {
+      "q": "What is the reason for this club?",
+      "lang": "en",
+      "expect": "club.why"
+    },
+    {
+      "q": "How many members does the club have?",
+      "lang": "en",
+      "expect": "club.members"
+    },
+    {
+      "q": "What divisions are there?",
+      "lang": "en",
+      "expect": "club.divisions"
+    },
+    {
+      "q": "Who is the leader of the club?",
+      "lang": "en",
+      "expect": "club.leader"
+    },
+    {
+      "q": "Who is the advisor?",
+      "lang": "en",
+      "expect": "club.advisor"
+    },
+    {
+      "q": "When and where do you meet?",
+      "lang": "en",
+      "expect": "club.meetings"
+    },
+    {
+      "q": "What does the software division do?",
+      "lang": "en",
+      "expect": "club.software"
+    },
+    {
+      "q": "How does the attendance recorder work?",
+      "lang": "en",
+      "expect": "club.attendance"
+    },
+    {
+      "q": "What is the house website?",
+      "lang": "en",
+      "expect": "club.house"
+    },
+    {
+      "q": "How do projects get tested and iterated?",
+      "lang": "en",
+      "expect": "club.process"
+    },
+    {
+      "q": "When is World Engineering Day?",
+      "lang": "en",
+      "expect": "club.wed"
+    },
+    {
+      "q": "Is there an exhibition?",
+      "lang": "en",
+      "expect": "club.showcase"
+    },
+    {
+      "q": "What is Forge Outreach?",
+      "lang": "en",
+      "expect": "club.outreach"
+    },
+    {
+      "q": "What is Lab Fundamentals?",
+      "lang": "en",
+      "expect": "club.lab"
+    },
+    {
+      "q": "What happens at the Workbench?",
+      "lang": "en",
+      "expect": "club.workbench"
+    },
+    {
+      "q": "What school are you at?",
+      "lang": "en",
+      "expect": "club.school"
+    },
+    {
+      "q": "Who are you?",
+      "lang": "en",
+      "expect": "pet.intro"
+    },
+    {
+      "q": "Are you a language model?",
+      "lang": "en",
+      "expect": "pet.intro"
+    },
+    {
+      "q": "Are you ChatGPT?",
+      "lang": "en",
+      "expect": "pet.intro"
+    },
+    {
+      "q": "Are you a robot?",
+      "lang": "en",
+      "expect": "pet.intro"
+    },
+    {
+      "q": "Who made you?",
+      "lang": "en",
+      "expect": "pet.makers"
+    },
+    {
+      "q": "Who is Haidar?",
+      "lang": "en",
+      "expect": "me.intro"
+    },
+    {
+      "q": "Who is Rizky?",
+      "lang": "en",
+      "expect": "partner.intro"
+    },
+    {
+      "q": "How can I join the club?",
+      "lang": "en",
+      "expect": null,
+      "note": "TODO_club_join is public:false"
+    },
+    {
+      "q": "What is your name?",
+      "lang": "en",
+      "expect": null,
+      "note": "TODO_pet_name is public:false"
+    },
+    {
+      "q": "What is the capital of France?",
+      "lang": "en",
+      "expect": null
+    },
+    {
+      "q": "Are you hungry?",
+      "lang": "en",
+      "expect": null,
+      "note": "pet state, not a fact"
+    },
+    {
+      "q": "Tell me a joke",
+      "lang": "en",
+      "expect": null
+    },
+    {
+      "q": "Siapa yang bikin kamu?",
+      "lang": "id",
+      "expect": "pet.makers"
+    },
+    {
+      "q": "Siapa wakil ketua klub?",
+      "lang": "id",
+      "expect": "club.leader"
+    },
+    {
+      "q": "Berapa jumlah anggota klub?",
+      "lang": "id",
+      "expect": "club.members"
+    },
+    {
+      "q": "What time does the club meet?",
+      "lang": "en",
+      "expect": "club.meetings"
+    },
+    {
+      "q": "Who built you?",
+      "lang": "en",
+      "expect": "pet.makers"
+    },
+    {
+      "q": "Who created this pet?",
+      "lang": "en",
+      "expect": "pet.makers"
+    },
+    {
+      "q": "Siapa presiden Amerika?",
+      "lang": "id",
+      "expect": null
+    },
+    {
+      "q": "How old are you?",
+      "lang": "en",
+      "expect": null
+    },
+    {
+      "q": "Apa makanan favoritmu?",
+      "lang": "id",
+      "expect": null
+    },
+    {
+      "q": "What is your favourite food?",
+      "lang": "en",
+      "expect": null
+    }
+  ],
+  "_known_gaps": "'why'/'kenapa' are deliberately NOT keywords: 'why are you sad?' would otherwise return the club.why fact. So 'Why was this club created?' deflects; 'What is the reason / purpose...' matches."
+}

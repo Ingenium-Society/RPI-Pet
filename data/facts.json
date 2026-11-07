@@ -2,14 +2,693 @@
   {
     "id": "club.intro",
     "about": "club",
-    "public": false,
+    "public": true,
     "keywords": {
-      "id": ["klub", "ekskul", "komunitas"],
-      "en": ["club", "team", "community"]
+      "id": [
+        "klub",
+        "ekskul",
+        "ingenium",
+        "komunitas"
+      ],
+      "en": [
+        "club",
+        "ingenium",
+        "community",
+        "society"
+      ]
     },
     "text": {
-      "id": "TODO: satu kalimat tentang klub, 25 kata atau kurang.",
-      "en": "TODO: one sentence about the club, 25 words or fewer."
+      "id": "Ingenium Society adalah klub teknik SMA Global Darussalam Academy, tempat siswa merancang, membangun, dan menguji proyek nyata.",
+      "en": "Ingenium Society is the engineering club of SMA Global Darussalam Academy, where students design, build, and test real projects."
+    },
+    "fallback_line": {
+      "id": "Aku bagian dari Ingenium Society, klub teknik di sekolahku! Tanya kakak-kakak di klub ya.",
+      "en": "I belong to Ingenium Society, the engineering club at my school! Ask the club members for more."
+    },
+    "must_contain": [
+      "Ingenium"
+    ]
+  },
+  {
+    "id": "club.why",
+    "about": "club",
+    "public": true,
+    "keywords": {
+      "id": [
+        "tujuan",
+        "alasan",
+        "misi",
+        "manfaat"
+      ],
+      "en": [
+        "purpose",
+        "goal",
+        "mission",
+        "reason",
+        "benefit",
+        "exist"
+      ]
+    },
+    "text": {
+      "id": "Klub ini ada karena siswa belum punya wadah resmi untuk belajar teknik, dan lebih menghargai proses terdokumentasi daripada produk jadi.",
+      "en": "The club exists because students had no official place to explore engineering, and it values documented learning over finished products."
+    },
+    "fallback_line": {
+      "id": "Klub ini dibuat supaya siswa bisa belajar teknik lewat proyek nyata!",
+      "en": "The club exists so students can learn engineering by building real projects!"
+    },
+    "must_contain": []
+  },
+  {
+    "id": "club.members",
+    "about": "club",
+    "public": true,
+    "keywords": {
+      "id": [
+        "anggota",
+        "jumlah"
+      ],
+      "en": [
+        "members",
+        "member",
+        "headcount"
+      ]
+    },
+    "text": {
+      "id": "Ingenium Society punya 26 anggota yang tersebar di empat divisi.",
+      "en": "Ingenium Society has 26 members across four divisions."
+    },
+    "fallback_line": {
+      "id": "Ada 26 anggota di klub kami!",
+      "en": "There are 26 of us in the club!"
+    },
+    "must_contain": [
+      "26"
+    ]
+  },
+  {
+    "id": "club.divisions",
+    "about": "club",
+    "public": true,
+    "keywords": {
+      "id": [
+        "divisi",
+        "bidang",
+        "aerospace",
+        "mekatronika",
+        "mechatronics",
+        "biotech",
+        "departemen"
+      ],
+      "en": [
+        "division",
+        "divisions",
+        "department",
+        "aerospace",
+        "mechatronics",
+        "biotech",
+        "environmental"
+      ]
+    },
+    "text": {
+      "id": "Empat divisinya adalah Software and AI, Aerospace and Mechanical, Mechatronics, serta BioTech and Environmental Engineering.",
+      "en": "The four divisions are Software and AI, Aerospace and Mechanical, Mechatronics, and BioTech and Environmental Engineering."
+    },
+    "fallback_line": {
+      "id": "Ada empat divisi: Software and AI, Aerospace and Mechanical, Mechatronics, serta BioTech and Environmental!",
+      "en": "There are four divisions: Software and AI, Aerospace and Mechanical, Mechatronics, and BioTech and Environmental!"
+    },
+    "must_contain": [
+      "Mechatronics"
+    ]
+  },
+  {
+    "id": "club.leader",
+    "about": "club",
+    "public": true,
+    "keywords": {
+      "id": [
+        "ketua",
+        "pemimpin",
+        "memimpin",
+        "wakil"
+      ],
+      "en": [
+        "leader",
+        "president",
+        "lead",
+        "leads",
+        "vice"
+      ]
+    },
+    "text": {
+      "id": "Arya Bagus Rahadian memimpin Ingenium Society, dan Haidar Ali Fawwaz Nasirodin adalah wakil ketuanya.",
+      "en": "Arya Bagus Rahadian leads Ingenium Society, and Haidar Ali Fawwaz Nasirodin is the vice leader."
+    },
+    "fallback_line": {
+      "id": "Ketua klubku adalah Arya Bagus Rahadian!",
+      "en": "My club's leader is Arya Bagus Rahadian!"
+    },
+    "must_contain": [
+      "Arya"
+    ]
+  },
+  {
+    "id": "club.advisor",
+    "about": "club",
+    "public": true,
+    "keywords": {
+      "id": [
+        "pembina",
+        "penasihat",
+        "pembimbing",
+        "advisor"
+      ],
+      "en": [
+        "advisor",
+        "adviser",
+        "supervisor"
+      ]
+    },
+    "text": {
+      "id": "Pak Muhammad Hasan, Ph.D. adalah pembina klub ini.",
+      "en": "Pak Muhammad Hasan, Ph.D. is the club's advisor."
+    },
+    "fallback_line": {
+      "id": "Pembina klub kami adalah Pak Muhammad Hasan!",
+      "en": "Our club advisor is Pak Muhammad Hasan!"
+    },
+    "must_contain": [
+      "Hasan"
+    ]
+  },
+  {
+    "id": "club.meetings",
+    "about": "club",
+    "public": true,
+    "keywords": {
+      "id": [
+        "jadwal",
+        "pertemuan",
+        "bertemu",
+        "kumpul",
+        "rapat",
+        "meeting",
+        "ruang",
+        "r-318"
+      ],
+      "en": [
+        "meet",
+        "meets",
+        "meeting",
+        "meetings",
+        "schedule",
+        "room",
+        "r-318"
+      ]
+    },
+    "text": {
+      "id": "Klub bertemu hari Minggu pagi, sekitar dua minggu sekali, pukul 09.30 sampai 11.30 di ruang R-318.",
+      "en": "The club meets on Sunday mornings, about every two weeks, from 09:30 to 11:30 in room R-318."
+    },
+    "fallback_line": {
+      "id": "Kami berkumpul hari Minggu pagi di ruang R-318!",
+      "en": "We meet on Sunday mornings in room R-318!"
+    },
+    "must_contain": [
+      "R-318"
+    ]
+  },
+  {
+    "id": "club.software",
+    "about": "club",
+    "public": true,
+    "keywords": {
+      "id": [
+        "software",
+        "coding",
+        "pemrograman"
+      ],
+      "en": [
+        "software",
+        "software division",
+        "coding",
+        "programming"
+      ]
+    },
+    "text": {
+      "id": "Haidar memimpin divisi Software and AI Engineering yang beranggotakan tujuh orang dan membuat hewan peliharaan ini.",
+      "en": "Haidar heads the Software and AI Engineering division, which has seven members and built this pet."
+    },
+    "fallback_line": {
+      "id": "Haidar memimpin divisi Software and AI Engineering, yang membuat aku!",
+      "en": "Haidar heads the Software and AI Engineering division, which built me!"
+    },
+    "must_contain": [
+      "Haidar"
+    ]
+  },
+  {
+    "id": "club.attendance",
+    "about": "club",
+    "public": true,
+    "keywords": {
+      "id": [
+        "absen",
+        "kehadiran",
+        "rfid",
+        "nfc",
+        "esp32",
+        "attendance",
+        "recorder",
+        "apel"
+      ],
+      "en": [
+        "attendance",
+        "recorder",
+        "roll",
+        "rfid",
+        "nfc",
+        "esp32",
+        "scanner"
+      ]
+    },
+    "text": {
+      "id": "Attendance Recorder mencatat absen asrama memakai kartu RFID dan ESP32, lalu menyimpan waktunya ke Google Sheet lewat Wi-Fi.",
+      "en": "The Attendance Recorder logs boarding roll-call with RFID cards and an ESP32, saving timestamps to a Google Sheet over Wi-Fi."
+    },
+    "fallback_line": {
+      "id": "Attendance Recorder itu proyek absen otomatis pakai kartu RFID!",
+      "en": "The Attendance Recorder is a project for automatic roll-call using RFID cards!"
+    },
+    "must_contain": [
+      "RFID"
+    ]
+  },
+  {
+    "id": "club.house",
+    "about": "club",
+    "public": true,
+    "keywords": {
+      "id": [
+        "website",
+        "situs",
+        "house",
+        "poin",
+        "leaderboard",
+        "supabase",
+        "fastapi",
+        "react"
+      ],
+      "en": [
+        "website",
+        "house",
+        "points",
+        "leaderboard",
+        "standings",
+        "supabase",
+        "fastapi",
+        "react"
+      ]
+    },
+    "text": {
+      "id": "House Website mencatat poin, musim, sejarah, dan acara house, dibuat dengan React, FastAPI, dan Supabase.",
+      "en": "The House Website tracks house points, seasons, history, and events, built with React, FastAPI, and Supabase."
+    },
+    "fallback_line": {
+      "id": "House Website itu situs untuk melihat poin dan sejarah house!",
+      "en": "The House Website is a site for seeing house points and history!"
+    },
+    "must_contain": [
+      "House"
+    ]
+  },
+  {
+    "id": "club.process",
+    "about": "club",
+    "public": true,
+    "keywords": {
+      "id": [
+        "prototipe",
+        "iterasi",
+        "diiterasi",
+        "logbook",
+        "dokumentasi",
+        "semester"
+      ],
+      "en": [
+        "prototype",
+        "iteration",
+        "iterate",
+        "iterated",
+        "logbook",
+        "documentation",
+        "semester"
+      ]
+    },
+    "text": {
+      "id": "Setiap proyek dibuat prototipenya, diuji, dan diperbaiki, dengan target satu sampai dua per semester, dan yang belum jadi tetap didokumentasikan.",
+      "en": "Every project is prototyped, tested, and iterated, aiming for one to two per semester, and unfinished ones are still documented."
+    },
+    "fallback_line": {
+      "id": "Setiap proyek dibuat, diuji, diperbaiki, lalu dicatat, bahkan yang belum jadi!",
+      "en": "Every project gets built, tested, improved, and documented, even the unfinished ones!"
+    },
+    "must_contain": []
+  },
+  {
+    "id": "club.wed",
+    "about": "club",
+    "public": true,
+    "keywords": {
+      "id": [
+        "world",
+        "unesco",
+        "night"
+      ],
+      "en": [
+        "world",
+        "unesco",
+        "night"
+      ]
+    },
+    "text": {
+      "id": "World Engineering Day jatuh pada 4 Maret, dan sekolah merayakannya pada 6 dan 7 Maret 2027 lewat kompetisi House Night.",
+      "en": "World Engineering Day falls on 4 March, and the school celebrates it on 6 and 7 March 2027 with House Night competitions."
+    },
+    "fallback_line": {
+      "id": "World Engineering Day dirayakan 6 dan 7 Maret 2027 lewat kompetisi House Night!",
+      "en": "World Engineering Day is celebrated on 6 and 7 March 2027 with the House Night Competition!"
+    },
+    "must_contain": [
+      "2027"
+    ]
+  },
+  {
+    "id": "club.showcase",
+    "about": "club",
+    "public": true,
+    "keywords": {
+      "id": [
+        "showcase",
+        "pameran",
+        "ekspo"
+      ],
+      "en": [
+        "showcase",
+        "exhibition",
+        "expo",
+        "exhibit"
+      ]
+    },
+    "text": {
+      "id": "Ingenium Showcase adalah pameran tahunan proyek yang selesai maupun berjalan, terbuka untuk siswa, guru, dan orang tua, dengan tanggal yang belum ditentukan.",
+      "en": "The Ingenium Showcase is an annual exhibition of finished and in-progress projects, open to students, teachers, and parents, and the date is not set yet."
+    },
+    "fallback_line": {
+      "id": "Ingenium Showcase itu pameran tahunan proyek klub. Tanggalnya belum ditentukan!",
+      "en": "The Ingenium Showcase is the club's yearly project exhibition. The date isn't set yet!"
+    },
+    "must_contain": [
+      "Showcase"
+    ]
+  },
+  {
+    "id": "club.outreach",
+    "about": "club",
+    "public": true,
+    "keywords": {
+      "id": [
+        "forge",
+        "outreach",
+        "workshop",
+        "sd",
+        "smp"
+      ],
+      "en": [
+        "forge",
+        "outreach",
+        "workshop",
+        "elementary",
+        "junior"
+      ]
+    },
+    "text": {
+      "id": "Forge Outreach adalah workshop praktik tempat anggota klub mengajar siswa SD dan SMP undangan tentang mesin sederhana, robotika, dan komputer.",
+      "en": "Forge Outreach is a hands-on workshop where club members teach invited elementary and junior high students about simple machines, robotics, and computers."
+    },
+    "fallback_line": {
+      "id": "Forge Outreach itu workshop teknik untuk siswa SD dan SMP!",
+      "en": "Forge Outreach is an engineering workshop for elementary and junior high students!"
+    },
+    "must_contain": [
+      "Forge"
+    ]
+  },
+  {
+    "id": "club.lab",
+    "about": "club",
+    "public": true,
+    "keywords": {
+      "id": [
+        "lab",
+        "laboratorium",
+        "fundamentals",
+        "keselamatan",
+        "pelatihan"
+      ],
+      "en": [
+        "lab",
+        "laboratory",
+        "fundamentals",
+        "safety",
+        "training"
+      ]
+    },
+    "text": {
+      "id": "Lab Fundamentals mengajarkan penggunaan aman dan perawatan alat lab, dan anggota baru wajib mengikutinya sebelum memakai lab.",
+      "en": "Lab Fundamentals teaches safe use and maintenance of lab equipment, and new members must complete it before using the lab."
+    },
+    "fallback_line": {
+      "id": "Lab Fundamentals itu pelatihan keselamatan lab untuk anggota baru!",
+      "en": "Lab Fundamentals is lab safety training for new members!"
+    },
+    "must_contain": [
+      "Fundamentals"
+    ]
+  },
+  {
+    "id": "club.workbench",
+    "about": "club",
+    "public": true,
+    "keywords": {
+      "id": [
+        "workbench",
+        "mengusulkan",
+        "usul"
+      ],
+      "en": [
+        "workbench",
+        "pitch",
+        "pitches"
+      ]
+    },
+    "text": {
+      "id": "Di The Workbench, anggota mengusulkan ide proyek dan membentuk kelompok, lalu lingkupnya disepakati dengan ketua atau pembina.",
+      "en": "At The Workbench, members pitch project ideas and form groups, then agree the scope with the leader or advisor."
+    },
+    "fallback_line": {
+      "id": "The Workbench itu tempat anggota mengusulkan ide proyek dan membentuk kelompok!",
+      "en": "The Workbench is where members pitch project ideas and form teams!"
+    },
+    "must_contain": [
+      "Workbench"
+    ]
+  },
+  {
+    "id": "club.school",
+    "about": "club",
+    "public": true,
+    "keywords": {
+      "id": [
+        "sekolah",
+        "gda",
+        "darussalam",
+        "sleman",
+        "asrama"
+      ],
+      "en": [
+        "school",
+        "gda",
+        "darussalam",
+        "sleman",
+        "boarding"
+      ]
+    },
+    "text": {
+      "id": "SMA Global Darussalam Academy, atau GDA, adalah sekolah berasrama di Sleman.",
+      "en": "SMA Global Darussalam Academy, or GDA, is a boarding school in Sleman."
+    },
+    "fallback_line": {
+      "id": "Aku tinggal di SMA Global Darussalam Academy, sekolah berasrama di Sleman!",
+      "en": "I live at SMA Global Darussalam Academy, a boarding school in Sleman!"
+    },
+    "must_contain": [
+      "Darussalam"
+    ]
+  },
+  {
+    "id": "pet.intro",
+    "about": "pet",
+    "public": true,
+    "keywords": {
+      "id": [
+        "who are you",
+        "kamu siapa",
+        "siapa kamu",
+        "kamu apa",
+        "ai",
+        "robot",
+        "otak",
+        "raspberry",
+        "chatgpt",
+        "manusia",
+        "model",
+        "bahasa"
+      ],
+      "en": [
+        "who are you",
+        "what are you",
+        "ai",
+        "robot",
+        "brain",
+        "raspberry",
+        "chatgpt",
+        "human",
+        "language",
+        "model"
+      ]
+    },
+    "text": {
+      "id": "Aku hewan peliharaan virtual dengan otak AI kecil yang berjalan di Raspberry Pi Zero 2 W mungil yang tersambung ke laptop lewat USB.",
+      "en": "I am a virtual pet whose small AI brain runs on a tiny Raspberry Pi Zero 2 W connected to a laptop by USB."
+    },
+    "fallback_line": {
+      "id": "Aku hewan peliharaan virtual! Otakku AI mungil yang tinggal di komputer sekecil telapak tangan.",
+      "en": "I'm a virtual pet! My brain is a tiny AI living in a computer smaller than your hand."
+    },
+    "must_contain": []
+  },
+  {
+    "id": "pet.makers",
+    "about": "pet",
+    "public": true,
+    "keywords": {
+      "id": [
+        "membuat",
+        "pembuat",
+        "pencipta",
+        "kreator",
+        "bikin",
+        "developer",
+        "programmer"
+      ],
+      "en": [
+        "made",
+        "built",
+        "maker",
+        "makers",
+        "creator",
+        "created",
+        "builder",
+        "developer",
+        "programmer"
+      ]
+    },
+    "text": {
+      "id": "Haidar Ali Fawwaz Nasirodin dan Rizky Zilant Fattah dari divisi Software and AI Engineering membuat aku.",
+      "en": "Haidar Ali Fawwaz Nasirodin and Rizky Zilant Fattah, from the Software and AI Engineering division, built me."
+    },
+    "fallback_line": {
+      "id": "Aku dibuat oleh Haidar dan Rizky dari divisi Software and AI Engineering!",
+      "en": "I was made by Haidar and Rizky from the Software and AI Engineering division!"
+    },
+    "must_contain": [
+      "Haidar",
+      "Rizky"
+    ]
+  },
+  {
+    "id": "me.intro",
+    "about": "me",
+    "public": true,
+    "keywords": {
+      "id": [
+        "haidar",
+        "fawwaz",
+        "nasirodin"
+      ],
+      "en": [
+        "haidar",
+        "fawwaz",
+        "nasirodin"
+      ]
+    },
+    "text": {
+      "id": "Haidar Ali Fawwaz Nasirodin mengusulkan Ingenium Society, menjadi wakil ketuanya, memimpin divisi Software and AI, dan ikut membuat hewan peliharaan ini.",
+      "en": "Haidar Ali Fawwaz Nasirodin proposed Ingenium Society, is its vice leader, heads the Software and AI division, and co-built this pet."
+    },
+    "fallback_line": {
+      "id": "Haidar mengusulkan Ingenium Society dan ikut membuatku. Keren, kan?",
+      "en": "Haidar proposed Ingenium Society and helped build me. Pretty cool, right?"
+    },
+    "must_contain": [
+      "Haidar"
+    ]
+  },
+  {
+    "id": "partner.intro",
+    "about": "partner",
+    "public": true,
+    "keywords": {
+      "id": [
+        "rizky",
+        "zilant",
+        "fattah"
+      ],
+      "en": [
+        "rizky",
+        "zilant",
+        "fattah"
+      ]
+    },
+    "text": {
+      "id": "Rizky Zilant Fattah adalah anggota Software and AI Engineering yang ikut membuat hewan peliharaan ini, mengubah komputer mungil jadi teman ngobrol.",
+      "en": "Rizky Zilant Fattah is a Software and AI Engineering member who co-built this pet, turning a hand-sized computer into a chatty friend."
+    },
+    "fallback_line": {
+      "id": "Rizky ikut membuatku dari divisi Software and AI Engineering. Hebat banget!",
+      "en": "Rizky helped build me in the Software and AI Engineering division. Seriously talented!"
+    },
+    "must_contain": [
+      "Rizky"
+    ]
+  },
+  {
+    "id": "pet.name",
+    "about": "pet",
+    "public": false,
+    "keywords": {
+      "id": [
+        "namamu"
+      ],
+      "en": [
+        "name"
+      ]
+    },
+    "text": {
+      "id": "TODO: nama hewan peliharaan.",
+      "en": "TODO: the pet's name."
     },
     "fallback_line": {
       "id": "TODO: versi suara si hewan peliharaan.",
@@ -18,16 +697,67 @@
     "must_contain": []
   },
   {
-    "id": "me.intro",
+    "id": "club.join",
+    "about": "club",
+    "public": false,
+    "keywords": {
+      "id": [
+        "bergabung",
+        "daftar",
+        "gabung"
+      ],
+      "en": [
+        "join",
+        "apply"
+      ]
+    },
+    "text": {
+      "id": "TODO: cara bergabung ke klub (syarat, kapan, kontak).",
+      "en": "TODO: how to join the club (requirements, when, contact)."
+    },
+    "fallback_line": {
+      "id": "TODO: versi suara si hewan peliharaan.",
+      "en": "TODO: the pet's-voice version."
+    },
+    "must_contain": []
+  },
+  {
+    "id": "me.fun",
     "about": "me",
     "public": false,
     "keywords": {
-      "id": ["pembuat", "pencipta", "kreator"],
-      "en": ["maker", "creator", "builder"]
+      "id": [
+        "hobi"
+      ],
+      "en": [
+        "hobby"
+      ]
     },
     "text": {
-      "id": "TODO: satu kalimat tentang pembuatnya.",
-      "en": "TODO: one sentence about the maker."
+      "id": "TODO: Haidar: kelas, hobi, hal favorit, fakta unik.",
+      "en": "TODO: Haidar: grade, hobbies, favourite things, fun fact."
+    },
+    "fallback_line": {
+      "id": "TODO: versi suara si hewan peliharaan.",
+      "en": "TODO: the pet's-voice version."
+    },
+    "must_contain": []
+  },
+  {
+    "id": "partner.fun",
+    "about": "partner",
+    "public": false,
+    "keywords": {
+      "id": [
+        "hobi"
+      ],
+      "en": [
+        "hobby"
+      ]
+    },
+    "text": {
+      "id": "TODO: Rizky: kelas, hobi, hal favorit, fakta unik.",
+      "en": "TODO: Rizky: grade, hobbies, favourite things, fun fact."
     },
     "fallback_line": {
       "id": "TODO: versi suara si hewan peliharaan.",

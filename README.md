@@ -14,7 +14,7 @@ laptop (game + UI, source of truth)  <--- USB Ethernet (RNDIS/ECM) --->  Pi Zero
 
 | Path | What |
 |---|---|
-| `crates/pet-core` | pure library: facts schema, retrieval, (later) prompt builder, validator, mock generator |
+| `crates/pet-core` | pure library: facts schema, language detection, retrieval, prompt builder, validator, (later) mock generator |
 | `crates/pi-service` | axum service that runs on the Pi and fronts `llama-server` |
 | `apps/web` | game UI, runs on the laptop |
 | `data/facts.json` | bilingual (id/en) facts the pet may state. Placeholders are `public: false` |
