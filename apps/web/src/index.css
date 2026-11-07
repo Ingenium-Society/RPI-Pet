@@ -13,3 +13,156 @@ body,
 #root {
   height: 100%;
 }
+
+/* ---------------------------------------------------------------------------
+   Orb skin (?skin=orb). Everything here is scoped to `.skin-orb`, which is only
+   added to <main> for that URL. The default skin keeps every Tailwind class it
+   had before; unlayered rules below outrank Tailwind v4's layered utilities.
+   Palette: gold #bba553, navy #282f57, light grey #e8e8e8.
+   --------------------------------------------------------------------------- */
+.skin-orb {
+  --orb-gold: #bba553;
+  --orb-gold-bright: #e8d68e;
+  --orb-cream: #f3ecd2;
+  --orb-navy: #101632;
+  --orb-deep: #0a0e20;
+  --orb-text: #e8e8e8;
+  background: var(--orb-deep);
+  color: var(--orb-text);
+}
+
+.skin-orb [data-orb]:focus-visible {
+  outline: 2px solid var(--orb-gold-bright);
+  outline-offset: 2px;
+}
+
+/* Answer bubble ------------------------------------------------------------ */
+.skin-orb [data-orb="bubble"] {
+  background: rgba(16, 22, 50, 0.86);
+  border: 1px solid rgba(187, 165, 83, 0.45);
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(232, 214, 142, 0.1);
+  backdrop-filter: blur(10px);
+}
+.skin-orb [data-orb="bubble"]::after {
+  background: rgba(16, 22, 50, 0.94);
+  border-right: 1px solid rgba(187, 165, 83, 0.45);
+  border-bottom: 1px solid rgba(187, 165, 83, 0.45);
+}
+.skin-orb [data-orb="bubble"] p {
+  color: var(--orb-text);
+}
+.skin-orb [data-orb="bubble"] p[data-kind="pending"] {
+  color: #aab3d0;
+}
+.skin-orb [data-orb="bubble"] p[data-kind="error"] {
+  color: #ffb3a7;
+}
+
+/* Text input and send button ----------------------------------------------- */
+.skin-orb [data-orb="input"] {
+  background: rgba(11, 16, 38, 0.9);
+  border: 1px solid rgba(187, 165, 83, 0.5);
+  color: var(--orb-cream);
+  box-shadow: inset 0 0 20px rgba(187, 165, 83, 0.07);
+}
+.skin-orb [data-orb="input"]::placeholder {
+  color: #98a1c0;
+}
+.skin-orb [data-orb="input"]:disabled {
+  opacity: 0.72;
+}
+.skin-orb [data-orb="send"] {
+  background: linear-gradient(135deg, #e0cc74, #a9903f);
+  border: 1px solid var(--orb-gold-bright);
+  color: #10152e;
+  box-shadow: 0 0 18px rgba(187, 165, 83, 0.3);
+}
+.skin-orb [data-orb="send"]:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f5e6a8, #c9ae55);
+  box-shadow: 0 0 26px rgba(232, 214, 142, 0.5);
+}
+.skin-orb [data-orb="send"]:disabled {
+  opacity: 0.45;
+}
+
+/* Suggested question chips -------------------------------------------------- */
+.skin-orb [data-orb="chip-label"] {
+  color: #cbc18c;
+}
+.skin-orb [data-orb="chip"] {
+  background: rgba(16, 22, 50, 0.88);
+  border: 1px solid rgba(187, 165, 83, 0.45);
+  color: var(--orb-cream);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+.skin-orb [data-orb="chip"]:hover:not(:disabled) {
+  background: rgba(187, 165, 83, 0.24);
+  border-color: var(--orb-gold-bright);
+  color: #fff7dc;
+  box-shadow: 0 0 20px rgba(187, 165, 83, 0.38);
+}
+.skin-orb [data-orb="chip"]:disabled {
+  opacity: 0.5;
+}
+
+/* Care buttons, drag hint and spark ghost ----------------------------------- */
+.skin-orb [data-orb="care"] {
+  background: rgba(16, 22, 50, 0.88);
+  border: 1px solid rgba(187, 165, 83, 0.45);
+  color: var(--orb-cream);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+.skin-orb [data-orb="care"]:hover {
+  background: rgba(187, 165, 83, 0.24);
+  border-color: var(--orb-gold-bright);
+  color: #fff7dc;
+  box-shadow: 0 0 20px rgba(187, 165, 83, 0.38);
+}
+.skin-orb [data-orb="dot"] {
+  background: var(--orb-gold-bright);
+  box-shadow: 0 0 8px rgba(232, 214, 142, 0.85);
+}
+.skin-orb [data-orb="hint"] {
+  color: #bdb283;
+}
+.skin-orb [data-orb="ghost"] {
+  background: rgba(16, 22, 50, 0.92);
+  border: 1px solid rgba(187, 165, 83, 0.5);
+  box-shadow: 0 0 26px rgba(187, 165, 83, 0.45);
+}
+.skin-orb [data-orb="ghost"][data-over="true"] {
+  background: rgba(187, 165, 83, 0.3);
+  border-color: #ffeaa4;
+  box-shadow: 0 0 34px rgba(255, 234, 164, 0.7);
+}
+
+/* Benchmark panel ----------------------------------------------------------- */
+.skin-orb [data-orb="bench"] {
+  background: rgba(16, 22, 50, 0.88);
+  border: 1px solid rgba(187, 165, 83, 0.42);
+  color: var(--orb-text);
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(232, 214, 142, 0.08);
+  backdrop-filter: blur(10px);
+}
+.skin-orb [data-orb="bench"] h2 {
+  color: var(--orb-gold-bright);
+}
+.skin-orb [data-orb="bench"] small {
+  color: #9fd8b4;
+}
+.skin-orb [data-orb="bench"] dt {
+  color: #b8bfd6;
+}
+.skin-orb [data-orb="bench"] dd {
+  color: var(--orb-cream);
+}
+.skin-orb [data-orb="bench-foot"] {
+  border-color: rgba(187, 165, 83, 0.3);
+}
+.skin-orb [data-orb="bar-track"] {
+  background: rgba(232, 232, 232, 0.13);
+}
+.skin-orb [data-orb="bar-fill"] {
+  background: linear-gradient(90deg, #8c7736, #e8d68e);
+  box-shadow: 0 0 10px rgba(232, 214, 142, 0.45);
+}

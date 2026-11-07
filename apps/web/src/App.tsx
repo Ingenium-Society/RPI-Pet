@@ -6,6 +6,7 @@ import CareBar from './components/CareBar'
 import ChatInput from './components/ChatInput'
 import PetCanvas from './components/PetCanvas'
 import QuestionChips from './components/QuestionChips'
+import { isOrb, SKIN } from './game/skin'
 import { useGame } from './game/store'
 import { fetchHealth } from './net/api'
 
@@ -49,12 +50,19 @@ export default function App() {
   }, [])
 
   return (
-    <main className="relative h-screen w-screen overflow-hidden bg-mint text-ink">
+    <main
+      data-skin={SKIN}
+      className={`relative h-screen w-screen overflow-hidden bg-mint text-ink ${isOrb ? 'skin-orb' : ''}`}
+    >
       <PetCanvas />
       <Bubble />
       <BenchPanel />
       {/* One dock, so the controls stack instead of fighting over bottom offsets. */}
-      <div className="absolute inset-x-0 bottom-[5%] z-10 mx-auto flex w-[min(560px,calc(100vw-2rem))] flex-col gap-2.5">
+      <div
+        className={`absolute inset-x-0 bottom-[5%] z-10 mx-auto flex flex-col gap-2.5 ${
+          isOrb ? 'w-[min(700px,calc(100vw-2rem))]' : 'w-[min(560px,calc(100vw-2rem))]'
+        }`}
+      >
         <CareBar />
         <ChatInput />
         <QuestionChips />

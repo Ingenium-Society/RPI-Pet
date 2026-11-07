@@ -29,9 +29,12 @@ export default function QuestionChips() {
 
   return (
     <div aria-label={S.suggestionsLabel} className="flex flex-wrap items-center justify-center gap-2">
-      <span className="text-sm font-bold text-ink/70">{S.suggestions}</span>
+      <span data-orb="chip-label" className="text-sm font-bold text-ink/70">
+        {S.suggestions}
+      </span>
       {chipsOnPage(page).map((chip) => (
         <button
+          data-orb="chip"
           key={chip.q}
           type="button"
           disabled={disabled}

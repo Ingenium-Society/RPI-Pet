@@ -1,13 +1,14 @@
 import { useEffect, useRef } from 'react'
 import { emotionFor, type Emotion } from '../game/rules'
-import { PetScene } from '../game/scene'
+import { sceneClass } from '../game/skin'
 import { useGame } from '../game/store'
 
 export default function PetCanvas() {
   const hostRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const scene = new PetScene(
+    const Scene = sceneClass()
+    const scene = new Scene(
       () => {
         const s = useGame.getState()
         const now = performance.now()

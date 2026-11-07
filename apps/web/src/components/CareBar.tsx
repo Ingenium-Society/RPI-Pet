@@ -1,7 +1,8 @@
-import { useRef, useState, type PointerEvent } from 'react'
+import { useId, useRef, useState, type PointerEvent } from 'react'
 import { hitPet } from '../game/petTarget'
-import { useGame } from '../game/store'
 import type { CareAction } from '../game/rules'
+import { isOrb } from '../game/skin'
+import { useGame } from '../game/store'
 import { S } from '../strings'
 
 const CARE: { action: CareAction; label: string; dot: string }[] = [
@@ -30,14 +31,39 @@ function Cookie({ size = 20 }: { size?: number }) {
   )
 }
 
+/** Orb skin's treat: a glowing gold shard, same shape language as the gem. */
+function Spark({ size = 20 }: { size?: number }) {
+  const id = useId().replace(/:/g, '')
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
+      <defs>
+        <radialGradient id={`spark-glow-${id}`}>
+          <stop offset="0%" stopColor="#fff3bd" stopOpacity="0.95" />
+          <stop offset="55%" stopColor="#e0cc74" stopOpacity="0.4" />
+          <stop offset="100%" stopColor="#bba553" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <circle cx="16" cy="16" r="15" fill={`url(#spark-glow-${id})`} />
+      <path
+        d="M16 3 L18.8 13.2 L29 16 L18.8 18.8 L16 29 L13.2 18.8 L3 16 L13.2 13.2 Z"
+        fill="#e8d68e"
+        stroke="#fff3bd"
+        strokeWidth="0.9"
+      />
+      <path d="M16 9.4 L17.4 14.6 L22.6 16 L17.4 17.4 L16 22.6 L14.6 17.4 L9.4 16 L14.6 14.6 Z" fill="#fff8dd" />
+    </svg>
+  )
+}
+
 type Drag = { x: number; y: number; over: boolean }
 
-/** Care buttons plus a biscuit that can be dragged onto the pet. */
+/** Care buttons plus a treat that can be dragged onto the companion. */
 export default function CareBar() {
   const care = useGame((s) => s.care)
   const touch = useGame((s) => s.touch)
   const dragging = useRef(false)
   const [drag, setDrag] = useState<Drag | null>(null)
+  const Treat = isOrb ? Spark : Cookie
 
   function down(e: PointerEvent<HTMLButtonElement>) {
     e.currentTarget.setPointerCapture(e.pointerId)
@@ -61,12 +87,13 @@ export default function CareBar() {
   return (
     <div role="group" aria-label={S.careLabel} className="flex flex-wrap items-center justify-center gap-2">
       {CARE.map((c) => (
-        <button key={c.action} type="button" onClick={() => care(c.action)} className={BUTTON}>
-          <span aria-hidden="true" className={`size-2 rounded-full ${c.dot}`} />
+        <button key={c.action} data-orb="care" type="button" onClick={() => care(c.action)} className={BUTTON}>
+          <span aria-hidden="true" data-orb="dot" className={`size-2 rounded-full ${c.dot}`} />
           {c.label}
         </button>
       ))}
       <button
+        data-orb="care"
         type="button"
         onPointerDown={down}
         onPointerMove={move}
@@ -75,19 +102,23 @@ export default function CareBar() {
         aria-label={`${S.treat} — ${S.treatHint}`}
         className={`${BUTTON} touch-none select-none ${drag ? 'opacity-40' : ''}`}
       >
-        <Cookie />
+        <Treat />
         {S.treat}
       </button>
-      <span className="text-xs font-medium text-ink/60">{S.treatHint}</span>
+      <span data-orb="hint" className="text-xs font-medium text-ink/60">
+        {S.treatHint}
+      </span>
 
       {drag && (
         <div
+          data-orb="ghost"
+          data-over={drag.over}
           className={`pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-1/2 rounded-full p-1.5 shadow-lg transition-colors ${
             drag.over ? 'bg-lemon ring-4 ring-raspberry' : 'bg-white/90'
           }`}
           style={{ left: drag.x, top: drag.y }}
         >
-          <Cookie size={40} />
+          <Treat size={40} />
         </div>
       )}
     </div>

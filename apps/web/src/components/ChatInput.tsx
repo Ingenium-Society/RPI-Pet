@@ -29,6 +29,7 @@ export default function ChatInput() {
   return (
     <form onSubmit={submit} className="flex w-full gap-2">
       <input
+        data-orb="input"
         ref={inputRef}
         value={input}
         onChange={(e) => setInput(e.target.value)}
@@ -40,6 +41,7 @@ export default function ChatInput() {
         className="min-w-0 flex-1 rounded-2xl bg-white px-4 py-3.5 outline-none focus-visible:ring-4 focus-visible:ring-ink disabled:opacity-70"
       />
       <button
+        data-orb="send"
         type="submit"
         disabled={disabled || !input.trim()}
         className="rounded-2xl bg-raspberry px-5 font-bold text-white focus-visible:ring-4 focus-visible:ring-ink focus-visible:outline-none disabled:opacity-50"

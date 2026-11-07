@@ -1,5 +1,9 @@
+import { isOrb } from './game/skin'
+
 // All visitor-facing text in one place (easy to translate or reword).
-export const S = {
+// BASE is the default skin, byte-for-byte. The orb only overrides the words that treat the
+// character like an animal; everything else (including `attract`) is shared.
+const BASE = {
   greeting: 'Halo! Tanya apa saja tentang pembuatku.',
   thinking: 'Sedang berpikir...',
   inputLabel: 'Pertanyaan untuk pet',
@@ -35,3 +39,21 @@ export const S = {
     treat: ['Biskuit! Yum yum~', 'Makasih, enak banget!'],
   },
 }
+
+export type Strings = typeof BASE
+
+/** Orb-only wording. Spoken lines stay short and plain because they go through TTS. */
+const ORB_OVERRIDES: Partial<Strings> = {
+  feed: 'Isi Daya',
+  play: 'Main',
+  sleep: 'Istirahat',
+  treat: 'Percikan',
+  canned: {
+    ...BASE.canned,
+    feed: ['Daya terisi! Segar~', 'Wah, terang lagi! Makasih~', 'Nyala lagi nih!'],
+    sleep: ['Istirahat dulu... redup~', 'Mode hemat... zzz', 'Sebentar ya... zzz'],
+    treat: ['Percikan! Hangat~', 'Makasih, jadi terang banget!'],
+  },
+}
+
+export const S: Strings = isOrb ? { ...BASE, ...ORB_OVERRIDES } : BASE

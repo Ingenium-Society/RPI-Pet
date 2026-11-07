@@ -1,7 +1,8 @@
 import { Application, Container, Graphics } from 'pixi.js'
 import { voice } from '../audio/voice'
 import { clearPetHitTest, setPetHitTest } from './petTarget'
-import type { Emotion, Reaction, ReactionKind } from './rules'
+import type { Emotion, ReactionKind } from './rules'
+import type { FrameInput } from './sceneContract'
 
 const COLOR = {
   ground: 0xb4e0c8,
@@ -11,12 +12,7 @@ const COLOR = {
   blush: 0xff8fa8,
 }
 
-export type FrameInput = {
-  emotion: Emotion
-  talking: boolean
-  sleepy: boolean
-  reaction: Reaction | null
-}
+export type { FrameInput } from './sceneContract'
 
 type Stroke = { width: number; color: number; cap: 'round' }
 
