@@ -237,8 +237,8 @@
       ]
     },
     "text": {
-      "id": "Haidar memimpin divisi Software and AI Engineering yang beranggotakan tujuh orang dan membuat hewan peliharaan ini.",
-      "en": "Haidar heads the Software and AI Engineering division, which has seven members and built this pet."
+      "id": "Haidar memimpin divisi Software and AI Engineering yang beranggotakan tujuh orang dan membuat teman virtual ini.",
+      "en": "Haidar heads the Software and AI Engineering division, which has seven members and built this virtual companion."
     },
     "fallback_line": {
       "id": "Haidar memimpin divisi Software and AI Engineering, yang membuat aku!",
@@ -570,12 +570,12 @@
       ]
     },
     "text": {
-      "id": "Aku hewan peliharaan virtual dengan otak AI kecil yang berjalan di Raspberry Pi Zero 2 W mungil yang tersambung ke laptop lewat USB.",
-      "en": "I am a virtual pet whose small AI brain runs on a tiny Raspberry Pi Zero 2 W connected to a laptop by USB."
+      "id": "Aku teman virtual dengan otak AI kecil yang berjalan di Raspberry Pi Zero 2 W mungil yang tersambung ke laptop lewat USB.",
+      "en": "I am a virtual companion whose small AI brain runs on a tiny Raspberry Pi Zero 2 W connected to a laptop by USB."
     },
     "fallback_line": {
-      "id": "Aku hewan peliharaan virtual! Otakku AI mungil yang tinggal di komputer sekecil telapak tangan.",
-      "en": "I'm a virtual pet! My brain is a tiny AI living in a computer smaller than your hand."
+      "id": "Aku teman virtual! Otakku AI mungil yang tinggal di komputer sekecil telapak tangan.",
+      "en": "I'm a virtual companion! My brain is a tiny AI living in a computer smaller than your hand."
     },
     "must_contain": []
   },
@@ -635,8 +635,8 @@
       ]
     },
     "text": {
-      "id": "Haidar Ali Fawwaz Nasirodin mengusulkan Ingenium Society, menjadi wakil ketuanya, memimpin divisi Software and AI, dan ikut membuat hewan peliharaan ini.",
-      "en": "Haidar Ali Fawwaz Nasirodin proposed Ingenium Society, is its vice leader, heads the Software and AI division, and co-built this pet."
+      "id": "Haidar Ali Fawwaz Nasirodin mengusulkan Ingenium Society, menjadi wakil ketuanya, memimpin divisi Software and AI, dan ikut membuat teman virtual ini.",
+      "en": "Haidar Ali Fawwaz Nasirodin proposed Ingenium Society, is its vice leader, heads the Software and AI division, and co-built this virtual companion."
     },
     "fallback_line": {
       "id": "Haidar mengusulkan Ingenium Society dan ikut membuatku. Keren, kan?",
@@ -663,8 +663,8 @@
       ]
     },
     "text": {
-      "id": "Rizky Zilant Fattah adalah anggota Software and AI Engineering yang ikut membuat hewan peliharaan ini, mengubah komputer mungil jadi teman ngobrol.",
-      "en": "Rizky Zilant Fattah is a Software and AI Engineering member who co-built this pet, turning a hand-sized computer into a chatty friend."
+      "id": "Rizky Zilant Fattah adalah anggota Software and AI Engineering yang ikut membuat teman virtual ini, mengubah komputer mungil jadi teman ngobrol.",
+      "en": "Rizky Zilant Fattah is a Software and AI Engineering member who co-built this virtual companion, turning a hand-sized computer into a chatty friend."
     },
     "fallback_line": {
       "id": "Rizky ikut membuatku dari divisi Software and AI Engineering. Hebat banget!",
@@ -687,12 +687,12 @@
       ]
     },
     "text": {
-      "id": "TODO: nama hewan peliharaan.",
-      "en": "TODO: the pet's name."
+      "id": "TODO: nama teman virtual.",
+      "en": "TODO: the companion's name."
     },
     "fallback_line": {
-      "id": "TODO: versi suara si hewan peliharaan.",
-      "en": "TODO: the pet's-voice version."
+      "id": "TODO: versi suara si teman virtual.",
+      "en": "TODO: the companion's-voice version."
     },
     "must_contain": []
   },
@@ -716,8 +716,8 @@
       "en": "TODO: how to join the club (requirements, when, contact)."
     },
     "fallback_line": {
-      "id": "TODO: versi suara si hewan peliharaan.",
-      "en": "TODO: the pet's-voice version."
+      "id": "TODO: versi suara si teman virtual.",
+      "en": "TODO: the companion's-voice version."
     },
     "must_contain": []
   },
@@ -738,8 +738,8 @@
       "en": "TODO: Haidar: grade, hobbies, favourite things, fun fact."
     },
     "fallback_line": {
-      "id": "TODO: versi suara si hewan peliharaan.",
-      "en": "TODO: the pet's-voice version."
+      "id": "TODO: versi suara si teman virtual.",
+      "en": "TODO: the companion's-voice version."
     },
     "must_contain": []
   },
@@ -760,8 +760,8 @@
       "en": "TODO: Rizky: grade, hobbies, favourite things, fun fact."
     },
     "fallback_line": {
-      "id": "TODO: versi suara si hewan peliharaan.",
-      "en": "TODO: the pet's-voice version."
+      "id": "TODO: versi suara si teman virtual.",
+      "en": "TODO: the companion's-voice version."
     },
     "must_contain": []
   }
