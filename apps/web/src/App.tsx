@@ -2,8 +2,10 @@ import { useEffect } from 'react'
 import { voice } from './audio/voice'
 import BenchPanel from './components/BenchPanel'
 import Bubble from './components/Bubble'
+import CareBar from './components/CareBar'
 import ChatInput from './components/ChatInput'
 import PetCanvas from './components/PetCanvas'
+import QuestionChips from './components/QuestionChips'
 import { useGame } from './game/store'
 import { fetchHealth } from './net/api'
 
@@ -50,8 +52,13 @@ export default function App() {
     <main className="relative h-screen w-screen overflow-hidden bg-mint text-ink">
       <PetCanvas />
       <Bubble />
-      <ChatInput />
       <BenchPanel />
+      {/* One dock, so the controls stack instead of fighting over bottom offsets. */}
+      <div className="absolute inset-x-0 bottom-[5%] z-10 mx-auto flex w-[min(560px,calc(100vw-2rem))] flex-col gap-2.5">
+        <CareBar />
+        <ChatInput />
+        <QuestionChips />
+      </div>
     </main>
   )
 }

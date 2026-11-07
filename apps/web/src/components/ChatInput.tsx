@@ -27,7 +27,7 @@ export default function ChatInput() {
   }
 
   return (
-    <form onSubmit={submit} className="absolute inset-x-0 bottom-[5%] mx-auto flex w-[min(560px,calc(100vw-2rem))] gap-2">
+    <form onSubmit={submit} className="flex w-full gap-2">
       <input
         ref={inputRef}
         value={input}

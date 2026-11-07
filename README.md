@@ -119,6 +119,24 @@ DATA_DIR=data cargo run -p pi-service                    # load facts/prompts fr
 npm run web                                              # chatbox at http://localhost:5173
 ```
 
+## Booth interactions
+
+These live in the web app and need no Pi and no model. They react instantly; only a typed or
+chipped question goes to the Pi (and takes seconds).
+
+| Thing | What it does |
+|---|---|
+| Question chips | Three short Indonesian questions under the chat box, rotating every 9 s and after each tap. One tap sends the question. Every chip is also in `data/eval/questions.json` with the same `expect` fact id, and `apps/web/src/game/chips.test.ts` checks that fact is public — a tap cannot end in a deflection. Chips are disabled while offline or busy. |
+| Poke | Tap the pet: wiggle, giggle, happiness up, canned line. |
+| Treat | Drag the biscuit from the care bar onto the pet: bigger giggle and a larger stat boost. Pointer events, so it works on a touchscreen. |
+| Feed / Play / Sleep | Change energy and happiness, say a canned line. Sleep also closes the eyes for 3.5 s. |
+| Attract mode | After 30 s with no interaction the pet yawns, waves and asks "Mau tahu soal klub?", then repeats every 25 s until somebody touches it. |
+
+Care and touch actions are logged to `logs/interactions.jsonl` with a `kind` field (`chat`,
+`care`, `touch`). Canned lines use the same TTS cache as replies, so they play instantly once
+warmed. **Browsers block all audio until the first click or tap on the page** — tap once after
+loading at the booth to unlock the attract-mode voice.
+
 ## Voice (text-to-speech)
 
 The pet speaks each reply. The Vite dev server on the laptop provides `GET /__tts?text=...&lang=id|en`

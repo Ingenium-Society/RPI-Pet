@@ -5,6 +5,7 @@ class VoicePlayer {
   private ctx?: AudioContext
   private analyser?: AnalyserNode
   private buf = new Uint8Array(0)
+  private current?: AudioBufferSourceNode
 
   /** Browsers block audio until the page has had a user gesture. */
   unlock() {
@@ -24,11 +25,21 @@ class VoicePlayer {
       this.buf = new Uint8Array(this.analyser.fftSize)
     }
 
+    // Canned lines can arrive while a model reply is still speaking. Never talk over it.
+    try {
+      this.current?.stop()
+    } catch {
+      /* the clip had already ended */
+    }
     const src = ctx.createBufferSource()
     src.buffer = audio
     src.connect(this.analyser)
+    this.current = src
     await new Promise<void>((resolve) => {
-      src.onended = () => resolve()
+      src.onended = () => {
+        if (this.current === src) this.current = undefined
+        resolve()
+      }
       src.start()
     })
   }

@@ -3,6 +3,11 @@
 
 export type Emotion = 'neutral' | 'happy' | 'sad' | 'sleepy' | 'thinking'
 export type Stats = { energy: number; happiness: number } // each 0..100
+export type CareAction = 'feed' | 'play' | 'sleep'
+export type TouchKind = 'poke' | 'treat'
+/** An instant animation cue. `id` grows so the renderer can spot a new one every time. */
+export type ReactionKind = 'giggle' | 'yawn' | 'call'
+export type Reaction = { id: number; kind: ReactionKind }
 
 /** Every game number lives here. Starting values, adjust while playtesting. */
 export const TUNING = {
@@ -14,6 +19,21 @@ export const TUNING = {
   /** After this many quiet seconds the pet rests and energy recovers. */
   restAfterSec: 20,
   restRate: 0.4,
+  /** Instant, model-free reactions: stats change right away so the visitor sees a result. */
+  touch: {
+    poke: { energy: 0, happiness: 5 } satisfies Stats,
+    treat: { energy: 6, happiness: 12 } satisfies Stats,
+  },
+  care: {
+    feed: { energy: 22, happiness: 6 } satisfies Stats,
+    play: { energy: -12, happiness: 20 } satisfies Stats,
+    sleep: { energy: 35, happiness: -2 } satisfies Stats,
+  },
+  /** How long the pet keeps its eyes closed after Sleep. */
+  sleepSec: 3.5,
+  /** Attract mode: first call-out after this much quiet, then every repeatSec while still idle. */
+  attractAfterSec: 30,
+  attractRepeatSec: 25,
 }
 
 const clamp = (v: number) => Math.max(0, Math.min(100, v))
@@ -22,6 +42,24 @@ export function afterVisitorMessage(s: Stats): Stats {
   return {
     energy: clamp(s.energy + TUNING.perMessage.energy),
     happiness: clamp(s.happiness + TUNING.perMessage.happiness),
+  }
+}
+
+/** Care buttons. Pure so the numbers are easy to test and tune. */
+export function applyCare(s: Stats, action: CareAction): Stats {
+  const d = TUNING.care[action]
+  return {
+    energy: clamp(s.energy + d.energy),
+    happiness: clamp(s.happiness + d.happiness),
+  }
+}
+
+/** Tapping the pet or dropping a treat on it. */
+export function applyTouch(s: Stats, kind: TouchKind): Stats {
+  const d = TUNING.touch[kind]
+  return {
+    energy: clamp(s.energy + d.energy),
+    happiness: clamp(s.happiness + d.happiness),
   }
 }
 

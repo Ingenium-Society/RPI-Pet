@@ -1,6 +1,36 @@
 {
-  "_note": "expect = fact id retrieval should return, or null if the pet must deflect (out of scope, pet-state chat, or public:false fact). SYNTHETIC: add real visitor questions from logs/interactions.jsonl before trusting the tuned MIN_SCORE.",
+  "_note": "expect = fact id retrieval should return, or null if the pet must deflect (out of scope, pet-state chat, or public:false fact). The short questions used as tappable chips in apps/web/src/game/chips.ts are kept here too, so chips.test.ts + this eval set prove a tap always lands on a public fact. SYNTHETIC: add real visitor questions from logs/interactions.jsonl before trusting the tuned MIN_SCORE.",
   "questions": [
+    {
+      "q": "Siapa ketua klub?",
+      "lang": "id",
+      "expect": "club.leader"
+    },
+    {
+      "q": "Siapa yang membuatmu?",
+      "lang": "id",
+      "expect": "pet.makers"
+    },
+    {
+      "q": "Ingenium itu apa?",
+      "lang": "id",
+      "expect": "club.intro"
+    },
+    {
+      "q": "Ada berapa anggota?",
+      "lang": "id",
+      "expect": "club.members"
+    },
+    {
+      "q": "Ada divisi apa saja?",
+      "lang": "id",
+      "expect": "club.divisions"
+    },
+    {
+      "q": "Kapan klub bertemu?",
+      "lang": "id",
+      "expect": "club.meetings"
+    },
     {
       "q": "Ingenium itu apa sih?",
       "lang": "id",

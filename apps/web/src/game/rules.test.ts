@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { TUNING, afterVisitorMessage, buildStyleHint, emotionFor, step } from './rules'
+import { TUNING, afterVisitorMessage, applyCare, applyTouch, buildStyleHint, emotionFor, step } from './rules'
 
 describe('emotionFor', () => {
   it('is neutral in a normal mood', () => {
@@ -47,5 +47,37 @@ describe('stat changes', () => {
   })
   it('happiness always decays with time', () => {
     expect(step({ energy: 50, happiness: 50 }, 10, 100).happiness).toBeLessThan(50)
+  })
+})
+
+describe('instant care and touch actions', () => {
+  it('each care action applies its own tuning', () => {
+    const start = { energy: 40, happiness: 40 }
+    expect(applyCare(start, 'feed')).toEqual({
+      energy: 40 + TUNING.care.feed.energy,
+      happiness: 40 + TUNING.care.feed.happiness,
+    })
+    expect(applyCare(start, 'play')).toEqual({
+      energy: 40 + TUNING.care.play.energy,
+      happiness: 40 + TUNING.care.play.happiness,
+    })
+    expect(applyCare(start, 'sleep')).toEqual({
+      energy: 40 + TUNING.care.sleep.energy,
+      happiness: 40 + TUNING.care.sleep.happiness,
+    })
+  })
+
+  it('poking and a treat both raise happiness, a treat more', () => {
+    const start = { energy: 50, happiness: 50 }
+    const poke = applyTouch(start, 'poke')
+    const treat = applyTouch(start, 'treat')
+    expect(poke.happiness).toBeGreaterThan(50)
+    expect(treat.happiness).toBeGreaterThan(poke.happiness)
+  })
+
+  it('never leaves the 0..100 range', () => {
+    expect(applyCare({ energy: 99, happiness: 99 }, 'sleep')).toEqual({ energy: 100, happiness: 97 })
+    expect(applyCare({ energy: 1, happiness: 1 }, 'play')).toEqual({ energy: 0, happiness: 21 })
+    expect(applyTouch({ energy: 0, happiness: 100 }, 'poke')).toEqual({ energy: 0, happiness: 100 })
   })
 })

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { emotionFor } from '../game/rules'
+import { emotionFor, type Emotion } from '../game/rules'
 import { PetScene } from '../game/scene'
 import { useGame } from '../game/store'
 
@@ -7,13 +7,21 @@ export default function PetCanvas() {
   const hostRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const scene = new PetScene(() => {
-      const s = useGame.getState()
-      return {
-        emotion: s.busy ? 'thinking' : emotionFor(s.stats),
-        talking: performance.now() < s.speakingUntil,
-      }
-    })
+    const scene = new PetScene(
+      () => {
+        const s = useGame.getState()
+        const now = performance.now()
+        const sleepy = now < s.sleepUntil
+        const emotion: Emotion = s.busy ? 'thinking' : sleepy ? 'sleepy' : emotionFor(s.stats)
+        return {
+          emotion,
+          talking: now < s.speakingUntil,
+          sleepy,
+          reaction: s.reaction,
+        }
+      },
+      () => useGame.getState().touch('poke'),
+    )
     // init is async; wait for it before destroying so StrictMode's double mount is safe.
     const ready = scene.init(hostRef.current!).then(
       () => true,
