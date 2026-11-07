@@ -84,19 +84,38 @@ The web app's chatbox talks to the Pi through the Vite proxy (`/v1/*` -> `PI_URL
 
 | Endpoint | Request | Response |
 |---|---|---|
-| `GET /v1/health` | | `{status, service, version, llama_configured}` |
-| `POST /v1/chat` | `{"message": "..."}` (1 to 200 chars) | `{"reply": "...", "source": "llama" \| "mock"}` |
+| `GET /v1/health` | | `{status, service, version, llama_configured}` plus, when measurable: `llama_up`, `model`, `tok_per_sec`, `cpu_temp_c`, `ram_free_mb`, `throttled` |
+| `POST /v1/chat` | `{"message": "..."}` (1 to 200 chars) | `{"reply", "source", "fact_id", "lang"}` |
 
-Errors are `{"error": "..."}`: `400` for an empty or too-long message, `502` if llama-server
-did not answer.
+`source` says where the reply came from:
 
-`pi-service` forwards the message to llama-server's OpenAI-style `/v1/chat/completions` when
-`LLAMA_URL` is set, and returns a mock reply otherwise, so the whole chain can be tried with no Pi
-and no model:
+| `source` | Meaning |
+|---|---|
+| `llama` | a public fact matched, the model phrased it, and the answer passed validation |
+| `fallback` | a fact matched, but the model failed, timed out or broke the rules, so the fact's pre-written `fallback_line` was used |
+| `deflect` | no public fact matched; the pet says it does not know (the model is not called) |
+| `mock` | no model configured (`LLAMA_URL` unset); the fact's `fallback_line` is used |
+
+Errors are `{"error": "..."}`: `400` for an empty or too-long message. A model that is down is
+not an error for the visitor: they get the `fallback` line, and `/v1/health` shows `llama_up: false`.
+
+How a question is answered (`crates/pet-core` does the work, `pi-service` calls it):
+detect the language -> retrieve the best **public** fact -> build the prompt from
+`data/prompts/prefix.{id,en}.txt` + that one fact + the question -> llama-server `/completion`
+(stops at the first newline) -> validate the answer (length, no breaking character, every
+`must_contain` anchor present) -> use it, or else the `fallback_line`.
+
+Facts and prompt prefixes are compiled into the `pi-service` binary, so the Pi only needs that one
+file (rebuild after editing `data/`). To try edited data without rebuilding, point `DATA_DIR` at a
+`data/` folder. The game's `style_hint` (mood text) is accepted but not used yet: the prompt prefix
+must stay byte-identical for llama.cpp's prompt cache.
+
+The whole chain can be tried with no Pi and no model:
 
 ```bash
-cargo run -p pi-service                                  # mock replies
+cargo run -p pi-service                                  # facts only, no model
 LLAMA_URL=http://127.0.0.1:8081 cargo run -p pi-service  # real model
+DATA_DIR=data cargo run -p pi-service                    # load facts/prompts from disk
 npm run web                                              # chatbox at http://localhost:5173
 ```
 

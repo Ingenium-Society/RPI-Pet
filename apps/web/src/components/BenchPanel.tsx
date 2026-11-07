@@ -1,5 +1,14 @@
 import { useGame } from '../game/store'
+import type { ChatSource } from '../net/api'
 import { S } from '../strings'
+
+// What the pet's answer was based on, in words a visitor at the booth can read.
+const SOURCE_LABEL: Record<ChatSource, string> = {
+  llama: 'model AI',
+  fallback: 'kalimat cadangan',
+  deflect: 'di luar topik',
+  mock: 'tanpa model',
+}
 
 const fmtMs = (ms: number) => (ms >= 1000 ? `${(ms / 1000).toFixed(1)} s` : `${ms} ms`)
 
@@ -40,7 +49,8 @@ export default function BenchPanel() {
       <dl>
         {health?.llama_up != null && <Row label="Otak AI" value={health.llama_up ? 'aktif' : 'mati'} />}
         {health?.model && <Row label="Model" value={health.model} />}
-        <Row label="Sumber jawaban" value={last?.source ?? '-'} />
+        <Row label="Sumber jawaban" value={last ? SOURCE_LABEL[last.source] : '-'} />
+        {last?.factId && <Row label="Fakta" value={last.factId} />}
         <Row label="Waktu jawab" value={last ? fmtMs(last.ms) : '-'} />
         <Row label="Panjang jawaban" value={last ? `${last.chars} karakter` : '-'} />
         {health?.tok_per_sec != null && <Row label="Kecepatan" value={`${health.tok_per_sec.toFixed(1)} token/detik`} />}

@@ -1,11 +1,11 @@
 import { create } from 'zustand'
 import { speak } from '../audio/tts'
-import { MAX_INPUT_CHARS, askPet, logInteraction, type Health } from '../net/api'
+import { MAX_INPUT_CHARS, askPet, logInteraction, type ChatSource, type Health } from '../net/api'
 import { S } from '../strings'
 import { TUNING, afterVisitorMessage, buildStyleHint, step, type Stats } from './rules'
 
 type Bubble = { kind: 'idle' | 'pending' | 'reply' | 'error'; text: string }
-type LastReply = { ms: number; chars: number; source: 'llama' | 'mock' }
+type LastReply = { ms: number; chars: number; source: ChatSource; factId?: string }
 
 interface GameState {
   /** Rounded snapshot, refreshed about once per second (and after each message). */
@@ -61,15 +61,15 @@ export const useGame = create<GameState>()((set, get) => {
 
       const started = performance.now()
       try {
-        const { reply, source } = await askPet(message, styleHint)
+        const { reply, source, fact_id: factId } = await askPet(message, styleHint)
         const ms = Math.round(performance.now() - started)
         set({
           busy: false,
           bubble: { kind: 'reply', text: reply },
-          last: { ms, chars: reply.length, source },
+          last: { ms, chars: reply.length, source, factId },
           speakingUntil: performance.now() + reply.length * 70,
         })
-        logInteraction({ message, reply, source, ms, style_hint: styleHint, ...rounded() })
+        logInteraction({ message, reply, source, fact_id: factId, ms, style_hint: styleHint, ...rounded() })
         void speak(reply)
       } catch (err) {
         const ms = Math.round(performance.now() - started)

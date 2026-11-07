@@ -1,4 +1,4 @@
-use std::{sync::Arc, time::Duration};
+use std::{path::Path, sync::Arc, time::Duration};
 
 use axum::{
     extract::State,
@@ -6,45 +6,56 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
+use pet_core::{build_prompt, detect_lang, ground, no_match_line, retrieve, Lang, MIN_SCORE};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
+mod knowledge;
 mod telemetry;
+use knowledge::Knowledge;
 use telemetry::Telemetry;
 
 // Mirrors [limits] in config/pi-service.toml (which is not read by code yet).
 const MAX_INPUT_CHARS: usize = 200;
 const N_PREDICT: u32 = 32;
 const REQUEST_TIMEOUT: Duration = Duration::from_secs(12);
-/// Cap on the optional mood text from the game, to protect the small context window.
-const MAX_STYLE_HINT_CHARS: usize = 200;
-
-// TODO: move to data/prompts/prefix.{id,en}.txt once those are written.
-const SYSTEM_PROMPT: &str = "You are a small, friendly virtual pet. \
-Answer in one or two short sentences, in the same language the person uses.";
+/// Low: the answer should restate the fact, not get creative.
+const TEMPERATURE: f32 = 0.3;
 
 #[derive(Clone)]
 struct AppState {
     client: reqwest::Client,
-    /// Base URL of llama-server, e.g. http://127.0.0.1:8081. None = mock replies.
+    /// Base URL of llama-server, e.g. http://127.0.0.1:8081. None = no model: facts only.
     llama_url: Option<Arc<str>>,
     /// Numbers remembered between requests (last tokens/s, model name).
     telemetry: Arc<Telemetry>,
+    /// Facts and prompt prefixes.
+    knowledge: Arc<Knowledge>,
 }
 
+/// Unknown fields are ignored on purpose: the game also sends a `style_hint` (mood text).
+/// It is not used yet, because the prompt prefix must stay byte-identical for llama.cpp's
+/// prompt cache and a 270M model has not been tested with extra instructions.
 #[derive(Deserialize)]
 struct ChatRequest {
     message: String,
-    /// Optional extra system-prompt text from the game (mood: tired, cheerful, ...).
-    #[serde(default)]
-    style_hint: String,
 }
 
 #[derive(Serialize)]
 struct ChatResponse {
     reply: String,
-    /// "llama" when the model answered, "mock" when no model is configured.
+    /// Where the reply came from:
+    /// - "llama":    the model answered and the answer passed validation
+    /// - "fallback": a fact matched, but the model failed, timed out or broke the rules,
+    ///   so the fact's pre-written `fallback_line` is used
+    /// - "deflect":  no public fact matched, so the pet says it does not know (no model call)
+    /// - "mock":     no model is configured; the fact's `fallback_line` is used
     source: &'static str,
+    /// The fact the answer is based on. Absent for "deflect".
+    #[serde(skip_serializing_if = "Option::is_none")]
+    fact_id: Option<String>,
+    /// Detected language of the question.
+    lang: Lang,
 }
 
 type ApiError = (StatusCode, Json<Value>);
@@ -139,67 +150,75 @@ async fn chat(
         ));
     }
 
-    let Some(base) = st.llama_url.as_deref() else {
+    // 1. Which language, and which public fact (if any) answers the question?
+    let lang = detect_lang(message);
+    let Some(hit) = retrieve(&st.knowledge.facts, message, lang, MIN_SCORE) else {
+        tracing::info!(?lang, "no fact matched, deflecting");
         return Ok(Json(ChatResponse {
-            reply: mock_reply(message),
-            source: "mock",
+            reply: no_match_line(lang).to_string(),
+            source: "deflect",
+            fact_id: None,
+            lang,
         }));
     };
+    let fact = hit.fact;
 
-    let system = build_system_prompt(&req.style_hint);
-    let (reply, tok_per_sec) = ask_llama(&st.client, base, &system, message)
-        .await
-        .map_err(|e| {
-            tracing::warn!("llama-server request failed: {e}");
-            api_error(StatusCode::BAD_GATEWAY, "the pet's brain did not answer")
-        })?;
-    if let Some(v) = tok_per_sec {
-        st.telemetry.record_tok_per_sec(v);
-    }
+    // 2. Let the model phrase the fact in the pet's voice (if there is a model).
+    let model_answer = match st.llama_url.as_deref() {
+        None => None,
+        Some(base) => {
+            let prompt = build_prompt(st.knowledge.prefix(lang), fact, message, lang);
+            match ask_llama(&st.client, base, &prompt).await {
+                Ok((text, tok_per_sec)) => {
+                    if let Some(v) = tok_per_sec {
+                        st.telemetry.record_tok_per_sec(v);
+                    }
+                    Some(text)
+                }
+                Err(e) => {
+                    // The visitor still gets a sensible answer; /v1/health shows llama is down.
+                    tracing::warn!("llama-server request failed, using fallback line: {e}");
+                    None
+                }
+            }
+        }
+    };
+
+    // 3. Use the model's answer only if it validates, otherwise the pre-written line.
+    let grounded = ground(fact, lang, model_answer.as_deref());
+    let source = if st.llama_url.is_none() {
+        "mock"
+    } else if grounded.from_model {
+        "llama"
+    } else {
+        "fallback"
+    };
+    tracing::info!(fact = %fact.id, ?lang, score = hit.score, source, "answered");
     Ok(Json(ChatResponse {
-        reply,
-        source: "llama",
+        reply: grounded.text,
+        source,
+        fact_id: Some(fact.id.clone()),
+        lang,
     }))
 }
 
-/// Base prompt plus the game's mood hint (trimmed and length-capped), if any.
-fn build_system_prompt(style_hint: &str) -> String {
-    let hint: String = style_hint
-        .trim()
-        .chars()
-        .take(MAX_STYLE_HINT_CHARS)
-        .collect();
-    if hint.is_empty() {
-        SYSTEM_PROMPT.to_string()
-    } else {
-        format!("{SYSTEM_PROMPT} {hint}")
-    }
-}
-
-fn mock_reply(message: &str) -> String {
-    format!("(mock pet) I heard you say: {message}")
-}
-
+/// Raw text completion: `prompt` already ends with "Answer:" / "Jawaban:", and the first
+/// newline ends the answer. `cache_prompt` lets llama.cpp reuse the static prefix.
 async fn ask_llama(
     client: &reqwest::Client,
     base: &str,
-    system: &str,
-    message: &str,
+    prompt: &str,
 ) -> Result<(String, Option<f32>), String> {
     let body = json!({
-        "messages": [
-            { "role": "system", "content": system },
-            { "role": "user", "content": message },
-        ],
-        "max_tokens": N_PREDICT,
-        "temperature": 0.7,
+        "prompt": prompt,
+        "n_predict": N_PREDICT,
+        "temperature": TEMPERATURE,
+        "stop": ["\n"],
+        "cache_prompt": true,
         "stream": false,
     });
     let res = client
-        .post(format!(
-            "{}/v1/chat/completions",
-            base.trim_end_matches('/')
-        ))
+        .post(format!("{}/completion", base.trim_end_matches('/')))
         .json(&body)
         .send()
         .await
@@ -207,14 +226,13 @@ async fn ask_llama(
         .error_for_status()
         .map_err(|e| e.to_string())?;
     let value: Value = res.json().await.map_err(|e| e.to_string())?;
-    let reply = extract_reply(&value).ok_or_else(|| "unexpected response shape".to_string())?;
-    Ok((reply, telemetry::extract_tok_per_sec(&value)))
+    let text = extract_content(&value).ok_or_else(|| "unexpected response shape".to_string())?;
+    Ok((text, telemetry::extract_tok_per_sec(&value)))
 }
 
-/// Pull `choices[0].message.content` out of an OpenAI-style response.
-fn extract_reply(value: &Value) -> Option<String> {
-    let text = value["choices"][0]["message"]["content"].as_str()?.trim();
-    (!text.is_empty()).then(|| text.to_string())
+/// The generated text of a llama-server `/completion` response (may be empty).
+fn extract_content(value: &Value) -> Option<String> {
+    value["content"].as_str().map(str::to_string)
 }
 
 fn app(state: AppState) -> Router {
@@ -230,11 +248,23 @@ async fn main() {
 
     // On the Pi: BIND=192.168.7.1:3000 (the USB link address). Locally the default is fine.
     let bind = std::env::var("BIND").unwrap_or_else(|_| "127.0.0.1:3000".into());
-    // Set LLAMA_URL=http://127.0.0.1:8081 to use a running llama-server; unset = mock replies.
+    // Set LLAMA_URL=http://127.0.0.1:8081 to use a running llama-server; unset = facts only.
     let llama_url = std::env::var("LLAMA_URL")
         .ok()
         .filter(|s| !s.is_empty())
         .map(Arc::from);
+    // Unset = the facts and prompts compiled into this binary. DATA_DIR=/path/to/data = load
+    // facts.json and prompts/prefix.{id,en}.txt from there (no rebuild needed).
+    let knowledge = match std::env::var("DATA_DIR").ok().filter(|s| !s.is_empty()) {
+        Some(dir) => Knowledge::from_dir(Path::new(&dir)),
+        None => Knowledge::embedded(),
+    }
+    .unwrap_or_else(|e| panic!("cannot load facts: {e}"));
+    tracing::info!(
+        "{} facts loaded ({} public)",
+        knowledge.facts.len(),
+        knowledge.public_count()
+    );
 
     let client = reqwest::Client::builder()
         .timeout(REQUEST_TIMEOUT)
@@ -244,6 +274,7 @@ async fn main() {
         client,
         llama_url,
         telemetry: Arc::default(),
+        knowledge: Arc::new(knowledge),
     };
 
     let listener = tokio::net::TcpListener::bind(&bind)
@@ -251,7 +282,9 @@ async fn main() {
         .unwrap_or_else(|e| panic!("cannot bind {bind}: {e}"));
     match &state.llama_url {
         Some(u) => tracing::info!("pi-service listening on {bind}, llama-server at {u}"),
-        None => tracing::info!("pi-service listening on {bind}, mock replies (LLAMA_URL not set)"),
+        None => {
+            tracing::info!("pi-service listening on {bind}, facts only (LLAMA_URL not set)")
+        }
     }
     axum::serve(listener, app(state))
         .await
@@ -265,18 +298,21 @@ mod tests {
         body::{to_bytes, Body},
         http::Request,
     };
+    use std::sync::Mutex;
     use tower::ServiceExt;
+
+    // In-scope and out-of-scope questions taken from data/eval/questions.json.
+    const Q_INTRO_ID: &str = "Ingenium itu apa sih?"; // -> club.intro
+    const Q_LEADER_EN: &str = "Who is the leader of the club?"; // -> club.leader
+    const Q_OUT_OF_SCOPE: &str = "Presiden Indonesia siapa?"; // -> no fact
 
     fn state_for(llama_url: Option<&str>) -> AppState {
         AppState {
             client: reqwest::Client::new(),
             llama_url: llama_url.map(Arc::from),
             telemetry: Arc::default(),
+            knowledge: Arc::new(Knowledge::embedded().unwrap()),
         }
-    }
-
-    fn mock_state() -> AppState {
-        state_for(None)
     }
 
     async fn call(state: AppState, req: Request<Body>) -> (StatusCode, Value) {
@@ -306,8 +342,20 @@ mod tests {
             .unwrap()
     }
 
-    /// A stand-in for llama-server on a random local port.
-    async fn spawn_fake_llama() -> String {
+    async fn post_chat(state: AppState, message: &str) -> (StatusCode, Value) {
+        call(state, chat_req(message)).await
+    }
+
+    /// A stand-in for llama-server on a random local port. Answers every /completion with
+    /// `content` and records the request bodies it receives.
+    struct FakeLlama {
+        url: String,
+        requests: Arc<Mutex<Vec<Value>>>,
+    }
+
+    async fn spawn_fake_llama(content: &'static str, timings: bool) -> FakeLlama {
+        let requests = Arc::new(Mutex::new(Vec::new()));
+        let log = requests.clone();
         let fake = Router::new()
             .route("/health", get(|| async { Json(json!({ "status": "ok" })) }))
             .route(
@@ -317,49 +365,35 @@ mod tests {
                 }),
             )
             .route(
-                "/v1/chat/completions",
-                post(|| async {
-                    Json(json!({
-                        "choices": [{ "message": { "content": "hi" } }],
-                        "timings": { "predicted_per_second": 7.34 }
-                    }))
+                "/completion",
+                post(move |Json(body): Json<Value>| {
+                    let log = log.clone();
+                    async move {
+                        log.lock().unwrap().push(body);
+                        let mut res = json!({ "content": content });
+                        if timings {
+                            res["timings"] = json!({ "predicted_per_second": 7.34 });
+                        }
+                        Json(res)
+                    }
                 }),
             );
         let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
-        let addr = listener.local_addr().unwrap();
+        let url = format!("http://{}", listener.local_addr().unwrap());
         tokio::spawn(async move { axum::serve(listener, fake).await.unwrap() });
-        format!("http://{addr}")
+        FakeLlama { url, requests }
     }
 
-    async fn post_chat(body: &str) -> (StatusCode, Value) {
-        let res = app(mock_state())
-            .oneshot(
-                Request::post("/v1/chat")
-                    .header("content-type", "application/json")
-                    .body(Body::from(body.to_string()))
-                    .unwrap(),
-            )
-            .await
-            .unwrap();
-        let status = res.status();
-        let bytes = to_bytes(res.into_body(), 1 << 20).await.unwrap();
-        (
-            status,
-            serde_json::from_slice(&bytes).unwrap_or(Value::Null),
-        )
+    fn fallback_line(fact_id: &str, lang: Lang) -> String {
+        let k = Knowledge::embedded().unwrap();
+        k.fact(fact_id).unwrap().fallback_line.get(lang).clone()
     }
 
-    #[tokio::test]
-    async fn chat_returns_mock_reply() {
-        let (status, body) = post_chat(r#"{"message":"  hello  "}"#).await;
-        assert_eq!(status, StatusCode::OK);
-        assert_eq!(body["source"], "mock");
-        assert!(body["reply"].as_str().unwrap().contains("hello"));
-    }
+    // ---- request validation (unchanged behaviour) ----
 
     #[tokio::test]
     async fn chat_rejects_empty_message() {
-        let (status, body) = post_chat(r#"{"message":"   "}"#).await;
+        let (status, body) = post_chat(state_for(None), "   ").await;
         assert_eq!(status, StatusCode::BAD_REQUEST);
         assert!(body["error"].is_string());
     }
@@ -367,33 +401,153 @@ mod tests {
     #[tokio::test]
     async fn chat_rejects_overlong_message() {
         let long = "a".repeat(MAX_INPUT_CHARS + 1);
-        let (status, _) = post_chat(&format!(r#"{{"message":"{long}"}}"#)).await;
+        let (status, _) = post_chat(state_for(None), &long).await;
         assert_eq!(status, StatusCode::BAD_REQUEST);
     }
 
     #[tokio::test]
     async fn chat_counts_characters_not_bytes() {
         // 200 two-byte characters is within the limit even though it is 400 bytes.
-        let msg = "é".repeat(MAX_INPUT_CHARS);
-        let (status, _) = post_chat(&format!(r#"{{"message":"{msg}"}}"#)).await;
+        let (status, _) = post_chat(state_for(None), &"é".repeat(MAX_INPUT_CHARS)).await;
         assert_eq!(status, StatusCode::OK);
     }
 
     #[tokio::test]
     async fn chat_rejects_malformed_json() {
-        let (status, _) = post_chat(r#"{"nope":1}"#).await;
+        let req = Request::post("/v1/chat")
+            .header("content-type", "application/json")
+            .body(Body::from(r#"{"nope":1}"#))
+            .unwrap();
+        let (status, _) = call(state_for(None), req).await;
         assert!(status.is_client_error());
     }
 
     #[tokio::test]
-    async fn chat_accepts_style_hint() {
-        let (status, _) = post_chat(r#"{"message":"hi","style_hint":"You are sleepy."}"#).await;
+    async fn chat_ignores_the_games_style_hint() {
+        let req = Request::post("/v1/chat")
+            .header("content-type", "application/json")
+            .body(Body::from(
+                json!({ "message": Q_INTRO_ID, "style_hint": "You are sleepy." }).to_string(),
+            ))
+            .unwrap();
+        let (status, body) = call(state_for(None), req).await;
         assert_eq!(status, StatusCode::OK);
+        assert_eq!(body["fact_id"], "club.intro");
+    }
+
+    // ---- the facts layer ----
+
+    #[tokio::test]
+    async fn without_a_model_the_matched_facts_fallback_line_is_returned() {
+        let (status, body) = post_chat(state_for(None), Q_INTRO_ID).await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(body["source"], "mock");
+        assert_eq!(body["fact_id"], "club.intro");
+        assert_eq!(body["lang"], "id");
+        assert_eq!(body["reply"], fallback_line("club.intro", Lang::Id));
     }
 
     #[tokio::test]
+    async fn out_of_scope_questions_deflect_without_calling_the_model() {
+        let fake = spawn_fake_llama("ignored", true).await;
+        let (status, body) = post_chat(state_for(Some(&fake.url)), Q_OUT_OF_SCOPE).await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(body["source"], "deflect");
+        assert_eq!(body["reply"], no_match_line(Lang::Id));
+        assert!(body.get("fact_id").is_none());
+        assert!(
+            fake.requests.lock().unwrap().is_empty(),
+            "model must not be called"
+        );
+    }
+
+    #[tokio::test]
+    async fn a_valid_model_answer_is_used() {
+        let fake = spawn_fake_llama(" Aku bagian dari Ingenium, klub teknik!", true).await;
+        let (status, body) = post_chat(state_for(Some(&fake.url)), Q_INTRO_ID).await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(body["source"], "llama");
+        assert_eq!(body["fact_id"], "club.intro");
+        assert_eq!(body["reply"], "Aku bagian dari Ingenium, klub teknik!");
+    }
+
+    #[tokio::test]
+    async fn the_prompt_sent_to_the_model_is_built_from_prefix_and_fact() {
+        let fake = spawn_fake_llama("Ingenium!", true).await;
+        post_chat(state_for(Some(&fake.url)), Q_INTRO_ID).await;
+
+        let sent = fake.requests.lock().unwrap();
+        assert_eq!(sent.len(), 1);
+        let req = &sent[0];
+        let prompt = req["prompt"].as_str().unwrap();
+        let k = Knowledge::embedded().unwrap();
+        // The static prefix comes first, byte for byte (llama.cpp prompt cache).
+        assert!(prompt.starts_with(k.prefix(Lang::Id)));
+        // Then the retrieved fact and the question, ending where the answer should start.
+        let fact_text = k.fact("club.intro").unwrap().text.get(Lang::Id).clone();
+        assert!(prompt.contains(&format!("Fakta: {fact_text}")));
+        assert!(prompt.contains(&format!("Pertanyaan: {Q_INTRO_ID}")));
+        assert!(prompt.ends_with("Jawaban:"));
+        // The answer ends at the first newline, and the prefix is cached.
+        assert_eq!(req["stop"], json!(["\n"]));
+        assert_eq!(req["cache_prompt"], true);
+        assert_eq!(req["n_predict"], N_PREDICT);
+    }
+
+    #[tokio::test]
+    async fn english_questions_use_the_english_prefix_and_labels() {
+        let fake = spawn_fake_llama("Arya leads us!", true).await;
+        let (_, body) = post_chat(state_for(Some(&fake.url)), Q_LEADER_EN).await;
+        assert_eq!(body["lang"], "en");
+        assert_eq!(body["fact_id"], "club.leader");
+        assert_eq!(body["source"], "llama");
+
+        let sent = fake.requests.lock().unwrap();
+        let prompt = sent[0]["prompt"].as_str().unwrap();
+        let k = Knowledge::embedded().unwrap();
+        assert!(prompt.starts_with(k.prefix(Lang::En)));
+        assert!(prompt.ends_with("Answer:"));
+    }
+
+    #[tokio::test]
+    async fn an_answer_that_breaks_the_rules_is_replaced_by_the_fallback_line() {
+        // Breaks character (banned phrase) and is missing the fact's "Ingenium" anchor.
+        let fake = spawn_fake_llama(" Aku adalah model bahasa.", true).await;
+        let (status, body) = post_chat(state_for(Some(&fake.url)), Q_INTRO_ID).await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(body["source"], "fallback");
+        assert_eq!(body["reply"], fallback_line("club.intro", Lang::Id));
+    }
+
+    #[tokio::test]
+    async fn an_answer_missing_the_facts_anchor_is_replaced_by_the_fallback_line() {
+        let fake = spawn_fake_llama("Seseorang memimpin kami.", true).await;
+        let (_, body) = post_chat(state_for(Some(&fake.url)), Q_LEADER_EN).await;
+        assert_eq!(body["source"], "fallback");
+        assert_eq!(body["reply"], fallback_line("club.leader", Lang::En));
+    }
+
+    #[tokio::test]
+    async fn an_empty_model_answer_falls_back() {
+        let fake = spawn_fake_llama("", true).await;
+        let (_, body) = post_chat(state_for(Some(&fake.url)), Q_INTRO_ID).await;
+        assert_eq!(body["source"], "fallback");
+    }
+
+    #[tokio::test]
+    async fn an_unreachable_model_still_gives_the_visitor_an_answer() {
+        // Nothing listens on port 1: the request fails, but this is not an error for the visitor.
+        let (status, body) = post_chat(state_for(Some("http://127.0.0.1:1")), Q_INTRO_ID).await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(body["source"], "fallback");
+        assert_eq!(body["reply"], fallback_line("club.intro", Lang::Id));
+    }
+
+    // ---- health telemetry ----
+
+    #[tokio::test]
     async fn health_without_llama_omits_llama_fields() {
-        let h = get_health(mock_state()).await;
+        let h = get_health(state_for(None)).await;
         assert_eq!(h["status"], "ok");
         assert_eq!(h["llama_configured"], false);
         for key in ["llama_up", "model", "tok_per_sec"] {
@@ -403,8 +557,8 @@ mod tests {
 
     #[tokio::test]
     async fn health_reports_llama_up_model_and_speed() {
-        let url = spawn_fake_llama().await;
-        let state = state_for(Some(&url));
+        let fake = spawn_fake_llama("Ingenium!", true).await;
+        let state = state_for(Some(&fake.url));
 
         // Before any chat: llama is up and named, but no speed has been measured.
         let h = get_health(state.clone()).await;
@@ -414,9 +568,8 @@ mod tests {
         assert!(h.get("tok_per_sec").is_none());
 
         // After a chat the speed from llama-server's timings shows up.
-        let (status, body) = call(state.clone(), chat_req("hello")).await;
+        let (status, _) = post_chat(state.clone(), Q_INTRO_ID).await;
         assert_eq!(status, StatusCode::OK);
-        assert_eq!(body["source"], "llama");
         let h = get_health(state).await;
         assert!(
             (h["tok_per_sec"].as_f64().unwrap() - 7.3).abs() < 1e-6,
@@ -435,53 +588,41 @@ mod tests {
 
     #[tokio::test]
     async fn chat_without_timings_leaves_speed_unset() {
-        let fake = Router::new().route(
-            "/v1/chat/completions",
-            post(|| async { Json(json!({ "choices": [{ "message": { "content": "hi" } }] })) }),
-        );
-        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
-        let url = format!("http://{}", listener.local_addr().unwrap());
-        tokio::spawn(async move { axum::serve(listener, fake).await.unwrap() });
-
-        let state = state_for(Some(&url));
-        let (status, _) = call(state.clone(), chat_req("hello")).await;
+        let fake = spawn_fake_llama("Ingenium!", false).await;
+        let state = state_for(Some(&fake.url));
+        let (status, _) = post_chat(state.clone(), Q_INTRO_ID).await;
         assert_eq!(status, StatusCode::OK);
         assert!(state.telemetry.tok_per_sec().is_none());
     }
 
-    #[test]
-    fn empty_hint_leaves_prompt_unchanged() {
-        assert_eq!(build_system_prompt(""), SYSTEM_PROMPT);
-        assert_eq!(build_system_prompt("   "), SYSTEM_PROMPT);
+    #[tokio::test]
+    async fn a_deflected_question_does_not_touch_the_speed() {
+        let fake = spawn_fake_llama("x", true).await;
+        let state = state_for(Some(&fake.url));
+        post_chat(state.clone(), Q_OUT_OF_SCOPE).await;
+        assert!(state.telemetry.tok_per_sec().is_none());
     }
 
     #[test]
-    fn hint_is_appended_to_prompt() {
-        let p = build_system_prompt(" You are sleepy. ");
-        assert_eq!(p, format!("{SYSTEM_PROMPT} You are sleepy."));
-    }
-
-    #[test]
-    fn overlong_hint_is_truncated() {
-        let p = build_system_prompt(&"x".repeat(MAX_STYLE_HINT_CHARS + 50));
+    fn extracts_completion_content() {
         assert_eq!(
-            p.chars().count(),
-            SYSTEM_PROMPT.chars().count() + 1 + MAX_STYLE_HINT_CHARS
+            extract_content(&json!({ "content": " Halo! " })).as_deref(),
+            Some(" Halo! ")
+        );
+        // An empty answer is a valid response shape (validation rejects it later).
+        assert_eq!(
+            extract_content(&json!({ "content": "" })).as_deref(),
+            Some("")
         );
     }
 
     #[test]
-    fn extracts_openai_style_reply() {
-        let v = json!({ "choices": [{ "message": { "content": " Hi there! " } }] });
-        assert_eq!(extract_reply(&v).as_deref(), Some("Hi there!"));
-    }
-
-    #[test]
-    fn rejects_bad_or_empty_reply_shapes() {
-        assert!(extract_reply(&json!({})).is_none());
-        assert!(extract_reply(&json!({ "choices": [] })).is_none());
+    fn rejects_unexpected_completion_shapes() {
+        assert!(extract_content(&json!({})).is_none());
+        assert!(extract_content(&json!({ "content": 5 })).is_none());
+        // The chat-completions shape is not what /completion returns.
         assert!(
-            extract_reply(&json!({ "choices": [{ "message": { "content": "  " } }] })).is_none()
+            extract_content(&json!({ "choices": [{ "message": { "content": "x" } }] })).is_none()
         );
     }
 }

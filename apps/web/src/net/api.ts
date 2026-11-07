@@ -19,7 +19,22 @@ export type Health = {
   throttled?: boolean
 }
 
-export type ChatReply = { reply: string; source: 'llama' | 'mock' }
+/**
+ * Where a reply came from (see ChatResponse in pi-service):
+ * - llama:    the model answered and the answer passed validation
+ * - fallback: a fact matched but the model failed or broke the rules; pre-written line used
+ * - deflect:  no public fact matched, so the pet says it does not know
+ * - mock:     the Pi has no model configured; the fact's pre-written line is used
+ */
+export type ChatSource = 'llama' | 'fallback' | 'deflect' | 'mock'
+
+export type ChatReply = {
+  reply: string
+  source: ChatSource
+  /** The fact the answer is based on; absent for `deflect`. */
+  fact_id?: string
+  lang?: 'id' | 'en'
+}
 
 export async function fetchHealth(): Promise<Health | null> {
   try {
