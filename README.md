@@ -119,6 +119,21 @@ DATA_DIR=data cargo run -p pi-service                    # load facts/prompts fr
 npm run web                                              # chatbox at http://localhost:5173
 ```
 
+## Skins
+
+The glowing orb companion is what you get at http://localhost:5173/. The original pink pet is
+still there: `?skin=pet` (or `?skin=default`). The choice is read once at load from
+`apps/web/src/game/skin.ts`, so it cannot change mid-session.
+
+| | Orb (default) | Pet (`?skin=pet`) |
+|---|---|---|
+| Scene | `game/orbScene.ts` | `game/scene.ts` |
+| Look | faceted navy gem, gold rim, additive glow | mint background, raspberry blob |
+| Care buttons | Isi Daya / Main / Istirahat / Percikan | Makan / Main / Tidur / Biskuit |
+
+Both skins share the same store, facts, voice and interactions; only the drawing and the
+wording differ.
+
 ## Booth interactions
 
 These live in the web app and need no Pi and no model. They react instantly; only a typed or

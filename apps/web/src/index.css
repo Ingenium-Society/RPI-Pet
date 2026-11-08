@@ -15,9 +15,10 @@ body,
 }
 
 /* ---------------------------------------------------------------------------
-   Orb skin (?skin=orb). Everything here is scoped to `.skin-orb`, which is only
-   added to <main> for that URL. The default skin keeps every Tailwind class it
-   had before; unlayered rules below outrank Tailwind v4's layered utilities.
+   Orb skin: the default companion. Everything here is scoped to `.skin-orb`,
+   which App adds to <main> unless `?skin=pet` is set. The pet skin keeps every
+   Tailwind class it had before; unlayered rules below outrank Tailwind v4's
+   layered utilities.
    Palette: gold #bba553, navy #282f57, light grey #e8e8e8.
    --------------------------------------------------------------------------- */
 .skin-orb {

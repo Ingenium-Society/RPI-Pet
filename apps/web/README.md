@@ -7,7 +7,15 @@ Game UI for the pet (React + Tailwind + zustand + pixi.js). Runs on the laptop a
 ## Screen
 
 Bubble above the character, benchmark panel top-right, and one bottom dock holding the care
-buttons + draggable biscuit, the text input, and the rotating question chips under it.
+buttons + draggable treat, the text input, and the rotating question chips under it.
+
+## Skins
+
+`game/skin.ts` reads `?skin=` once and hands `PetCanvas` a scene class. The orb
+(`game/orbScene.ts`, navy + gold, dark overlays) is the default; `?skin=pet` selects the
+original `game/scene.ts` with its mint page and light panels. `strings.ts` keeps a
+byte-identical `BASE` and merges orb-only wording when `isOrb`, and `index.css` scopes all
+dark theming to `.skin-orb`.
 
 ## Game rules
 
