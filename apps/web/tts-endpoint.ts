@@ -14,27 +14,52 @@ import { join } from 'node:path'
 import { EdgeTTS } from 'node-edge-tts'
 
 export type Lang = 'id' | 'en'
-export type Voices = Record<Lang, { voice: string; lang: string }>
+export type VoiceSettings = {
+  voice: string
+  lang: string
+  /** SSML prosody offset, e.g. "-14Hz". Empty string keeps the service default. */
+  pitch: string
+  /** SSML prosody offset, e.g. "-4%". Empty string keeps the service default. */
+  rate: string
+}
+export type Voices = Record<Lang, VoiceSettings>
 export type Synth = (text: string, lang: Lang) => Promise<Buffer>
 
 /** Replies are at most 300 characters (see MAX_ANSWER_CHARS in pet-core); nothing longer is read. */
 export const MAX_TTS_CHARS = 300
 
-const DEFAULT_VOICES: Record<Lang, string> = {
-  id: 'id-ID-GadisNeural', // Indonesian, female
-  en: 'en-US-AriaNeural',
+// Deep male voices, pitched down and slowed a little: a flat, synthetic delivery rather than
+// a chirpy assistant. Edge's neural voices cannot do a true vocoder effect, so "robotic" here
+// means low, even and unhurried.
+const DEFAULT_VOICES: Record<Lang, { voice: string; pitch: string; rate: string }> = {
+  id: { voice: 'id-ID-ArdiNeural', pitch: '-14Hz', rate: '-4%' },
+  en: { voice: 'en-US-ChristopherNeural', pitch: '-14Hz', rate: '-4%' },
 }
+const DEFAULT_PITCH = '-14Hz'
+const DEFAULT_RATE = '-4%'
 
-/** "id-ID-GadisNeural" -> "id-ID". */
+/** "id-ID-ArdiNeural" -> "id-ID". */
 const localeOf = (voice: string) => voice.split('-').slice(0, 2).join('-')
 
-/** Default voices, overridable with TTS_VOICE_ID / TTS_VOICE_EN (e.g. id-ID-ArdiNeural). */
+/**
+ * Default voices, overridable with TTS_VOICE_ID / TTS_VOICE_EN, and the prosody with
+ * TTS_PITCH / TTS_RATE (SSML units, e.g. "-20Hz", "-10%"; "+0Hz" for neutral).
+ */
 export function voicesFromEnv(env: Record<string, string | undefined> = process.env): Voices {
+  const pitch = env.TTS_PITCH?.trim() || DEFAULT_PITCH
+  const rate = env.TTS_RATE?.trim() || DEFAULT_RATE
   const pick = (lang: Lang, key: string) => {
-    const voice = env[key]?.trim() || DEFAULT_VOICES[lang]
-    return { voice, lang: localeOf(voice) }
+    const voice = env[key]?.trim() || DEFAULT_VOICES[lang].voice
+    return { voice, lang: localeOf(voice), pitch, rate }
   }
   return { id: pick('id', 'TTS_VOICE_ID'), en: pick('en', 'TTS_VOICE_EN') }
+}
+
+/** Everything that changes the sound. A new tag invalidates the on-disk clip cache. */
+export function voiceTag(voices: Voices): string {
+  return (['id', 'en'] as const)
+    .map((lang) => `${voices[lang].voice}|${voices[lang].pitch}|${voices[lang].rate}`)
+    .join('~')
 }
 
 /**
@@ -54,10 +79,13 @@ export function cleanText(raw: string): string {
 /** The real synthesizer: one short websocket request to Edge's service per clip. */
 export function edgeSynth(voices: Voices = voicesFromEnv()): Synth {
   return async (text, lang) => {
+    const settings = voices[lang]
     const tts = new EdgeTTS({
-      voice: voices[lang].voice,
-      lang: voices[lang].lang,
+      voice: settings.voice,
+      lang: settings.lang,
       outputFormat: 'audio-24khz-48kbitrate-mono-mp3',
+      pitch: settings.pitch || undefined,
+      rate: settings.rate || undefined,
       timeout: 10_000,
     })
     const chunks: Buffer[] = []

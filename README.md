@@ -149,10 +149,16 @@ The pet speaks each reply. The Vite dev server on the laptop provides `GET /__tt
 - **It is not an official public API** (no API key, but Microsoft can change or limit it). If the
   project outgrows a school demo, Azure AI Speech offers the same voices officially.
 - **If it fails** (no internet, service down) the page uses the browser's built-in voice for that
-  reply, which works offline but sounds more robotic. Browsers need one click or tap on the page
+  reply, which works offline but sounds rougher. Browsers need one click or tap on the page
   before they will play any sound.
-- **Voices:** Indonesian `id-ID-GadisNeural`, English `en-US-AriaNeural`. Change them with
-  `TTS_VOICE_ID` / `TTS_VOICE_EN`, e.g. `TTS_VOICE_ID=id-ID-ArdiNeural npm run web`.
+- **Voices:** deep male defaults, Indonesian `id-ID-ArdiNeural`, English `en-US-ChristopherNeural`,
+  both pitched down `-14Hz` and slowed `-4%` so the delivery is low and flat rather than chirpy.
+  Override the voices with `TTS_VOICE_ID` / `TTS_VOICE_EN` and the prosody with `TTS_PITCH` /
+  `TTS_RATE` (SSML units, e.g. `TTS_PITCH=-24Hz TTS_RATE=-10% npm run web`; `+0Hz` for neutral).
+  Edge's neural voices cannot do a true vocoder effect, so "robotic" here means deep and even,
+  not a ring-modulated robot.
+- **Changing any of that re-synthesises the cache:** the clip key includes voice, pitch and rate,
+  so old clips are ignored and the first play after a change needs internet again.
 - Like the interaction log, this endpoint exists in the dev server and `vite preview`, not in a
   static build.
 

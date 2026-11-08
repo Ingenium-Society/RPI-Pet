@@ -4,7 +4,7 @@ import type { AddressInfo } from 'node:net'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { MAX_TTS_CHARS, cleanText, createTtsHandler, voicesFromEnv, type Synth } from './tts-endpoint'
+import { MAX_TTS_CHARS, cleanText, createTtsHandler, voiceTag, voicesFromEnv, type Synth } from './tts-endpoint'
 
 describe('cleanText', () => {
   it('collapses whitespace and strips markdown marks', () => {
@@ -29,20 +29,39 @@ describe('cleanText', () => {
 })
 
 describe('voicesFromEnv', () => {
-  it('has an Indonesian and an English default, with matching locales', () => {
+  it('defaults to deep male voices, pitched down and slowed', () => {
     const v = voicesFromEnv({})
-    expect(v.id).toEqual({ voice: 'id-ID-GadisNeural', lang: 'id-ID' })
-    expect(v.en).toEqual({ voice: 'en-US-AriaNeural', lang: 'en-US' })
+    expect(v.id).toEqual({ voice: 'id-ID-ArdiNeural', lang: 'id-ID', pitch: '-14Hz', rate: '-4%' })
+    expect(v.en).toEqual({ voice: 'en-US-ChristopherNeural', lang: 'en-US', pitch: '-14Hz', rate: '-4%' })
   })
 
   it('can be overridden, deriving the locale from the voice name', () => {
-    const v = voicesFromEnv({ TTS_VOICE_ID: 'id-ID-ArdiNeural', TTS_VOICE_EN: ' en-GB-SoniaNeural ' })
-    expect(v.id).toEqual({ voice: 'id-ID-ArdiNeural', lang: 'id-ID' })
-    expect(v.en).toEqual({ voice: 'en-GB-SoniaNeural', lang: 'en-GB' })
+    const v = voicesFromEnv({ TTS_VOICE_ID: 'id-ID-GadisNeural', TTS_VOICE_EN: ' en-GB-SoniaNeural ' })
+    expect(v.id).toEqual({ voice: 'id-ID-GadisNeural', lang: 'id-ID', pitch: '-14Hz', rate: '-4%' })
+    expect(v.en).toEqual({ voice: 'en-GB-SoniaNeural', lang: 'en-GB', pitch: '-14Hz', rate: '-4%' })
+  })
+
+  it('takes pitch and rate from the environment, for both languages', () => {
+    const v = voicesFromEnv({ TTS_PITCH: ' -24Hz ', TTS_RATE: '-12%' })
+    expect(v.id.pitch).toBe('-24Hz')
+    expect(v.en.pitch).toBe('-24Hz')
+    expect(v.id.rate).toBe('-12%')
+    expect(v.en.rate).toBe('-12%')
   })
 
   it('ignores blank overrides', () => {
-    expect(voicesFromEnv({ TTS_VOICE_ID: '  ' }).id.voice).toBe('id-ID-GadisNeural')
+    const v = voicesFromEnv({ TTS_VOICE_ID: '  ', TTS_PITCH: '', TTS_RATE: '   ' })
+    expect(v.id.voice).toBe('id-ID-ArdiNeural')
+    expect(v.id.pitch).toBe('-14Hz')
+    expect(v.id.rate).toBe('-4%')
+  })
+
+  it('changes the cache tag when only the prosody changes', () => {
+    const base = voiceTag(voicesFromEnv({}))
+    expect(voiceTag(voicesFromEnv({}))).toBe(base)
+    expect(voiceTag(voicesFromEnv({ TTS_PITCH: '-24Hz' }))).not.toBe(base)
+    expect(voiceTag(voicesFromEnv({ TTS_RATE: '-10%' }))).not.toBe(base)
+    expect(base).toContain('id-ID-ArdiNeural')
   })
 })
 

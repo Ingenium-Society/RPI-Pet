@@ -42,8 +42,8 @@ function speakWithBrowser(text: string, lang: Lang): Promise<boolean> {
   const prefix = lang
   utterance.voice =
     synth.getVoices().find((v) => v.lang.toLowerCase().startsWith(prefix)) ?? null
-  utterance.pitch = 1.3 // a little higher: it is a small pet
-  utterance.rate = 1.05
+  utterance.pitch = 0.65 // deep and flat, to sit close to the robotic Edge voice
+  utterance.rate = 0.95
 
   return new Promise((resolve) => {
     utterance.onend = () => resolve(true)
