@@ -152,6 +152,19 @@ Care and touch actions are logged to `logs/interactions.jsonl` with a `kind` fie
 warmed. **Browsers block all audio until the first click or tap on the page** — tap once after
 loading at the booth to unlock the attract-mode voice.
 
+## Minigame: Pertahanan Orbit
+
+"Main game" in the top-left corner (orb skin only) opens a full-screen formation shooter: the
+orb gem is the ship, angular shards are the invaders. Arrow keys / A-D or dragging move it;
+firing is automatic, which suits a one-handed booth. `Esc` or "Keluar" returns to the pet.
+
+The rules live in `apps/web/src/game/minigame/logic.ts` — a pure, seeded simulation with no
+Pixi and no clock, covered by 13 vitest cases (waves, scoring, damage, determinism). The
+renderer (`shooterScene.ts`) only maps normalised coordinates to pixels and feeds input. The
+best score is kept in `localStorage` under `orb-minigame-best`. While the game is open the pet
+is unmounted and its clock is paused, so stats do not decay and attract mode cannot talk over
+the game.
+
 ## Voice (text-to-speech)
 
 The pet speaks each reply. The Vite dev server on the laptop provides `GET /__tts?text=...&lang=id|en`

@@ -137,6 +137,20 @@ body,
   box-shadow: 0 0 34px rgba(255, 234, 164, 0.7);
 }
 
+/* Minigame launcher --------------------------------------------------------- */
+.skin-orb [data-orb="game"] {
+  background: rgba(16, 22, 50, 0.88);
+  border: 1px solid rgba(187, 165, 83, 0.45);
+  color: var(--orb-cream);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+.skin-orb [data-orb="game"]:hover {
+  background: rgba(187, 165, 83, 0.24);
+  border-color: var(--orb-gold-bright);
+  color: #fff7dc;
+  box-shadow: 0 0 20px rgba(187, 165, 83, 0.38);
+}
+
 /* Benchmark panel ----------------------------------------------------------- */
 .skin-orb [data-orb="bench"] {
   background: rgba(16, 22, 50, 0.88);

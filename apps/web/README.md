@@ -52,6 +52,14 @@ Canned lines (`src/strings.ts`) rotate and go through `speak('...', 'id')`. `voi
 the previous clip so a canned line never talks over a reply. Browsers need one tap before any
 audio plays.
 
+## Minigame
+
+`components/Minigame.tsx` replaces the whole screen while it is open; `App` unmounts the pet
+and pauses its clock. Rules are a pure seeded simulation in `game/minigame/logic.ts`
+(`createGame` / `startGame` / `stepGame`, normalised 0..1 coordinates, 13 tests);
+`game/minigame/shooterScene.ts` is the Pixi view and input. Best score lives in
+`localStorage['orb-minigame-best']`. Only offered in the orb skin.
+
 ## API used
 
 | Call | Notes |
