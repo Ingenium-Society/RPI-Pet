@@ -132,13 +132,14 @@ export class OrbScene implements Scene {
     const g = this.glow.clear()
     // Overlapping additive rings: a narrow bright band just outside the rim plus a long
     // faint tail. Cheaper than a blur filter and it keeps the glow reading as light.
-    for (let i = 0; i < 14; i++) {
-      const u = 1 - i / 14 // 1 at the outside, 0 at the core
-      const r = this.R * (0.84 + 2.1 * u)
-      const band = Math.exp(-(((u - 0.12) / 0.17) ** 2))
-      const tail = Math.exp(-(((u - 0.46) / 0.46) ** 2))
-      g.circle(0, 0, r).fill({ color: 0xffffff, alpha: 0.006 + 0.075 * band + 0.014 * tail })
+    // A tight bloom hugging the rim reads as light; a wide low-alpha wash reads as fog.
+    for (let i = 0; i < 6; i++) {
+      const u = i / 6
+      g.circle(0, 0, this.R * (0.95 + 0.55 * u)).fill({ color: 0xffffff, alpha: 0.26 * (1 - u) ** 1.6 + 0.02 })
     }
+    // A little light inside the gem so the core is not flat.
+    g.circle(0, 0, this.R * 0.72).fill({ color: 0xffffff, alpha: 0.05 })
+    g.circle(0, 0, this.R * 0.48).fill({ color: 0xffffff, alpha: 0.05 })
   }
 
   private layout() {
